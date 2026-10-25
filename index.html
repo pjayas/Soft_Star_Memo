@@ -200,7 +200,7 @@
     .swatch { width: 38px !important; height: 38px !important; }
     #swatches label[title="직접 고르기"] { width: 38px !important; height: 38px !important; }
 
-    body.signed-out #bottomBar, body.signed-out #modal, body.signed-out #menuSheet { display: none !important; }
+    body.signed-out #bottomBar, body.signed-out #modal, body.signed-out #menuSheet, body.signed-out #drawModal { display: none !important; }
     #bottomBar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; display: flex; gap: .6rem;
       padding: .6rem max(.75rem, env(safe-area-inset-right)) calc(.6rem + env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
       background: rgba(255,255,255,.9); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid #e2e8f0; }
@@ -212,6 +212,12 @@
     #menuSheet button.danger { background: #fef2f2; color: #b91c1c; }
     #menuSheet button.close { justify-content: center; background: #e2e8f0; }
     #toast { bottom: calc(86px + env(safe-area-inset-bottom)) !important; font-size: .95rem !important; max-width: 90vw; text-align: center; }
+    #drawModal > div { width: 100%; max-width: 40rem; background: #fff; border-radius: 22px 22px 0 0; padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom)); max-height: 92dvh; overflow: auto; }
+    #drawModal button { min-height: 48px; border-radius: 12px; font-weight: 700; font-size: 1rem; }
+    #drawModal button.dprimary { width: 100%; margin-top: .75rem; background: #1e293b; color: #fff; }
+    #drawModal button.dsub { width: 100%; margin-top: .5rem; background: #e2e8f0; color: #0f172a; }
+    #drawModal select { width: 100%; min-height: 46px; font-size: 16px; padding: .5rem .75rem; border: 1px solid #cbd5e1; border-radius: 12px; margin: .25rem 0 .75rem; background: #fff; }
+    #drawModal .sticky-note { margin-top: 1.5rem; }
     footer { font-size: .8rem !important; }
   </style>
 </head>
@@ -338,10 +344,13 @@
   <div id="menuSheet" class="modal-bg" onclick="if(event.target===this)closeMenu()">
     <div>
       <h2>더보기</h2>
-      <button onclick="toggleAll(true);closeMenu()">📖 모두 펼치기</button>
-      <button onclick="toggleAll(false);closeMenu()">📕 모두 접기</button>
+      <button onclick="closeMenu();openDraw()">🎲 랜덤 포스트잇 뽑기</button>
       <button class="close" onclick="closeMenu()">닫기</button>
     </div>
+  </div>
+
+  <div id="drawModal" class="modal-bg" onclick="if(event.target===this)closeDraw()">
+    <div id="drawBox"></div>
   </div>
 
   <div id="toast"></div>
@@ -349,7 +358,7 @@
   <script>
     /* ========== 기본 기능 ========== */
     function toggleAll(shouldOpen) {
-      document.querySelectorAll('.sticky-note details').forEach(d => {
+      document.querySelectorAll('#cardsGrid .sticky-note details').forEach(d => {
         if (d.closest('.sticky-note').style.display !== 'none') d.open = shouldOpen;
       });
     }
@@ -367,7 +376,7 @@
     function applyFilters() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       let visible = 0;
-      document.querySelectorAll('.sticky-note').forEach(card => {
+      document.querySelectorAll('#cardsGrid .sticky-note').forEach(card => {
         const catOk = currentCategory === 'all' || card.dataset.category === currentCategory;
         const kw = (card.dataset.keywords || '').toLowerCase();
         const searchOk = !query || kw.includes(query) || card.textContent.toLowerCase().includes(query);
@@ -739,11 +748,71 @@
     function openMenu() { document.getElementById('menuSheet').classList.add('show'); }
     function closeMenu() { document.getElementById('menuSheet').classList.remove('show'); }
     function toggleAllSmart() {
-      const ds = Array.from(document.querySelectorAll('.sticky-note')).filter(c => c.style.display !== 'none').map(c => c.querySelector('details'));
+      const ds = Array.from(document.querySelectorAll('#cardsGrid .sticky-note')).filter(c => c.style.display !== 'none').map(c => c.querySelector('details'));
       toggleAll(!ds.some(d => d && d.open));
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeMenu(); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeMenu(); closeDraw(); } });
+
+    /* ========== 랜덤 포스트잇 뽑기 ========== */
+    /* 선택한 분야에서 포스트잇을 무작위로 한 장씩 뽑습니다.
+       한 바퀴(전체 카드)를 다 뽑을 때까지 같은 카드가 반복되지 않습니다. */
+    let drawDeck = [], drawKey = null, drawLast = null;
+    function shuffle(a) {
+      a = a.slice();
+      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+      return a;
+    }
+    function openDraw() {
+      if (!requireReady()) return;
+      drawDeck = []; drawKey = null; drawLast = null;
+      const opts = ['<option value="all">전체 분야</option>'].concat(allCats().map(n => `<option value="${esc(n)}">${esc(n)}</option>`)).join('');
+      document.getElementById('drawBox').innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-lg font-extrabold text-slate-800">🎲 랜덤 포스트잇 뽑기</h2>
+          <button onclick="closeDraw()" style="min-height:40px;width:40px;color:#94a3b8">✕</button>
+        </div>
+        <label class="block text-xs font-bold text-slate-600">분야</label>
+        <select id="drawCat" onchange="drawCard()">${opts}</select>
+        <p id="drawInfo" class="text-xs text-slate-500"></p>
+        <div id="drawResult"></div>
+        <button class="dprimary" onclick="drawCard()">🎲 다시 뽑기</button>
+        <button class="dsub" onclick="closeDraw()">닫기</button>`;
+      document.getElementById('drawModal').classList.add('show');
+      drawCard();
+    }
+    function closeDraw() {
+      const m = document.getElementById('drawModal');
+      if (m) m.classList.remove('show');
+      const r = document.getElementById('drawResult');
+      if (r) r.replaceChildren();
+    }
+    function drawCard() {
+      const cat = document.getElementById('drawCat').value;
+      const pool = loadList(LS_CARDS).filter(c => cat === 'all' || c.category === cat);
+      const res = document.getElementById('drawResult');
+      const info = document.getElementById('drawInfo');
+      if (!pool.length) {
+        res.innerHTML = '<p class="text-center text-slate-500 py-8">이 분야에는 포스트잇이 없어요.</p>';
+        info.textContent = '';
+        return;
+      }
+      if (drawKey !== cat) { drawDeck = []; drawKey = cat; }
+      drawDeck = drawDeck.filter(id => pool.some(c => c.id === id));
+      if (!drawDeck.length) {
+        drawDeck = shuffle(pool.map(c => c.id));
+        if (pool.length > 1 && drawDeck[0] === drawLast) drawDeck.push(drawDeck.shift());
+      }
+      const id = drawDeck.shift();
+      drawLast = id;
+      const el = buildCard(pool.find(c => c.id === id));
+      TILTS.forEach(t => el.classList.remove(t));
+      el.querySelectorAll('.edit-btn,.del-btn,.note-pin').forEach(x => x.remove());
+      el.style.display = 'block';
+      el.querySelector('details').open = true;
+      res.replaceChildren(el);
+      info.textContent = `이번 바퀴에서 남은 카드: ${drawDeck.length}장 (전체 ${pool.length}장)`;
+    }
 
     /* ========== 초기화 ========== */
     (function init() {
