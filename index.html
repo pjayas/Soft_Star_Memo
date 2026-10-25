@@ -245,6 +245,7 @@
     #swatches label[title="직접 고르기"] { width: 38px !important; height: 38px !important; }
 
     /* 하단 고정 바 / 더보기 시트 */
+    body.signed-out #bottomBar, body.signed-out #modal, body.signed-out #menuSheet { display: none !important; }
     #bottomBar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; display: flex; gap: .6rem;
       padding: .6rem max(.75rem, env(safe-area-inset-right)) calc(.6rem + env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
       background: rgba(255,255,255,.9); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid #e2e8f0; }
@@ -259,7 +260,7 @@
     footer { font-size: .8rem !important; }
   </style>
 </head>
-<body class="p-3 md:p-6 lg:p-8">
+<body class="signed-out p-3 md:p-6 lg:p-8">
 
   <div class="max-w-7xl mx-auto">
 
@@ -286,6 +287,7 @@
       </div>
     </section>
 
+    <div id="boardContent" class="hidden">
     <!-- Header -->
     <header class="mb-8 text-center relative bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-200/80">
       <div class="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold tracking-wider uppercase mb-2">
@@ -315,11 +317,6 @@
           <button onclick="toggleAll(true)" class="mobile-hide px-2.5 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 transition whitespace-nowrap">모두 펼치기</button>
           <button onclick="toggleAll(false)" class="mobile-hide px-2.5 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 transition whitespace-nowrap">모두 접기</button>
           <button onclick="openModal()" class="mobile-hide px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white rounded-lg whitespace-nowrap">＋ 새 포스트잇</button>
-          <button onclick="restoreBuiltins()" class="mobile-hide px-2.5 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 transition whitespace-nowrap">기본 카드 복원</button>
-          <button onclick="exportData()" class="mobile-hide px-2.5 py-1.5 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg border border-emerald-300 transition whitespace-nowrap">⬇ 백업 저장</button>
-          <button onclick="document.getElementById('importFile').click()" class="mobile-hide px-2.5 py-1.5 text-xs font-semibold bg-sky-50 hover:bg-sky-100 text-sky-800 rounded-lg border border-sky-300 transition whitespace-nowrap">⬆ 백업 불러오기</button>
-          <input type="file" id="importFile" accept=".json,application/json" class="hidden" onchange="importData(this)">
-          <button onclick="deleteAllCards()" class="mobile-hide px-2.5 py-1.5 text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-700 rounded-lg border border-red-300 transition whitespace-nowrap">🗑 전체 삭제</button>
         </div>
       </div>
     </header>
@@ -817,6 +814,7 @@
     <footer class="mt-12 text-center text-xs text-slate-500 pb-8">
       생물학 심화 스터디 보드 • 함께 쓰는 포스트잇 • Firebase 자동 동기화
     </footer>
+    </div>
   </div>
 
   <!-- 새 포스트잇 / 수정 모달 -->
@@ -873,10 +871,6 @@
       <h2>더보기</h2>
       <button onclick="toggleAll(true);closeMenu()">📖 모두 펼치기</button>
       <button onclick="toggleAll(false);closeMenu()">📕 모두 접기</button>
-      <button onclick="closeMenu();exportData()">⬇ 백업 저장</button>
-      <button onclick="closeMenu();document.getElementById('importFile').click()">⬆ 백업 불러오기</button>
-      <button onclick="closeMenu();restoreBuiltins()">↩ 기본 카드 복원</button>
-      <button class="danger" onclick="closeMenu();deleteAllCards()">🗑 전체 삭제</button>
       <button class="close" onclick="closeMenu()">닫기</button>
     </div>
   </div>
@@ -1080,111 +1074,6 @@
       toast('삭제되었습니다');
     }
 
-    function deleteAllCards() {
-      const all = document.querySelectorAll('#cardsGrid > article');
-      if (!all.length) { toast('삭제할 포스트잇이 없습니다'); return; }
-      const mine = loadList(LS_CARDS);
-      const msg = `포스트잇 ${all.length}장을 모두 삭제할까요?\n`
-        + (mine.length ? `직접 만든 카드 ${mine.length}장은 복구할 수 없으므로, 삭제 전에 백업 파일을 자동으로 저장합니다.\n` : '')
-        + '(기본 카드는 "기본 카드 복원"으로 되돌릴 수 있습니다.)';
-      if (!confirm(msg)) return;
-      if (mine.length) exportData();
-      const builtinIds = Array.from(document.querySelectorAll('#cardsGrid > article[data-builtin-id]')).map(el => el.dataset.builtinId);
-      const hidden = Array.from(new Set(loadList(LS_HIDDEN).concat(builtinIds)));
-      if (!saveList(LS_HIDDEN, hidden) || !saveList(LS_CARDS, [])) return;
-      all.forEach(el => el.remove());
-      applyFilters();
-      toast('모든 포스트잇을 삭제했습니다');
-    }
-
-    function restoreBuiltins() {
-      if (!loadList(LS_HIDDEN).length) { toast('복원할 기본 카드가 없습니다'); return; }
-      if (!confirm('삭제한 기본 카드를 모두 복원할까요? (직접 만든 카드는 유지됩니다)')) return;
-      saveList(LS_HIDDEN, []);
-      location.reload();
-    }
-
-    /* ========== 백업 저장 / 불러오기 (JSON) ========== */
-    function exportData() {
-      const payload = {
-        app: 'biology-postit-board',
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        customCards: loadList(LS_CARDS),
-        hiddenBuiltin: loadList(LS_HIDDEN),
-        customCategories: loadList(LS_CATS),
-        builtinCategoryNames: loadMap(LS_BNAMES)
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const d = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      a.href = url;
-      const fileName = `포스트잇백업_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}시${pad(d.getMinutes())}분.json`;
-      a.download = fileName;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast(`백업 저장 완료: ${fileName}`);
-    }
-
-    function sanitizeCard(c) {
-      if (!c || typeof c !== 'object' || typeof c.title !== 'string' || !c.title.trim()) return null;
-      const colors = COLOR_PRESETS.map(x => x.id);
-      return {
-        id: (typeof c.id === 'string' && c.id) ? c.id.slice(0, 40) : 'c' + Date.now() + Math.floor(Math.random() * 1000),
-        title: c.title.trim().slice(0, 60),
-        category: (typeof c.category === 'string' && c.category.trim() && c.category.trim().length <= 12) ? c.category.trim() : builtinName('분자생물학'),
-        color: (typeof c.color === 'string' && (colors.includes(c.color) || /^#[0-9a-fA-F]{6}$/.test(c.color))) ? c.color : 'yellow',
-        body: typeof c.body === 'string' ? c.body : '',
-        memo: typeof c.memo === 'string' ? c.memo : '',
-        warn: typeof c.warn === 'string' ? c.warn : '',
-        html: typeof c.html === 'string' ? c.html.slice(0, 300000) : '',
-        tilt: TILTS.includes(c.tilt) ? c.tilt : TILTS[Math.floor(Math.random() * TILTS.length)]
-      };
-    }
-
-    function importData(input) {
-      const file = input.files[0];
-      input.value = '';
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onerror = () => alert('파일을 읽지 못했습니다.');
-      reader.onload = () => {
-        let data;
-        try { data = JSON.parse(reader.result); }
-        catch (e) { alert('올바른 JSON 파일이 아닙니다.'); return; }
-        if (!data || data.app !== 'biology-postit-board' || !Array.isArray(data.customCards)) {
-          alert('이 보드에서 만든 백업 파일이 아닙니다.'); return;
-        }
-        const incoming = data.customCards.map(sanitizeCard).filter(Boolean);
-        const hiddenIn = Array.isArray(data.hiddenBuiltin) ? data.hiddenBuiltin.filter(x => typeof x === 'string') : [];
-        const current = loadList(LS_CARDS);
-        const ids = new Set(current.map(c => c.id));
-        const added = incoming.filter(c => !ids.has(c.id));
-        if (!confirm(`백업 파일에서 새 카드 ${added.length}장을 추가합니다.\n(이미 있는 카드는 건너뛰며, 현재 카드는 지워지지 않습니다.)\n계속할까요?`)) return;
-        const localMap = loadMap(LS_BNAMES);
-        const fileMap = (data.builtinCategoryNames && typeof data.builtinCategoryNames === 'object') ? data.builtinCategoryNames : {};
-        const nameFix = {};
-        ORIG_CATS.forEach(o => {
-          const fv = fileMap[o];
-          const fileName = (typeof fv === 'string' && fv.trim() && fv.trim().length <= 12) ? fv.trim() : o;
-          if (!localMap[o] && fileName !== o && !allCats().includes(fileName)) localMap[o] = fileName;
-          nameFix[fileName] = localMap[o] || o;
-        });
-        saveList(LS_BNAMES, localMap);
-        added.forEach(c => { if (nameFix[c.category]) c.category = nameFix[c.category]; });
-        const hiddenAll = Array.from(new Set(loadList(LS_HIDDEN).concat(hiddenIn)));
-        const catsIn = (Array.isArray(data.customCategories) ? data.customCategories : [])
-          .filter(x => typeof x === 'string' && x.trim() && x.trim().length <= 12).map(x => x.trim());
-        const catsAll = Array.from(new Set(loadList(LS_CATS).concat(catsIn, added.map(c => c.category))))
-          .filter(n => !builtinNames().includes(n) && n !== '전체보기');
-        if (saveList(LS_CARDS, current.concat(added)) && saveList(LS_HIDDEN, hiddenAll) && saveList(LS_CATS, catsAll)) {
-          location.reload();
-        }
-      };
-      reader.readAsText(file);
-    }
 
     /* ========== 색상 선택 ========== */
     const COLOR_PRESETS = [
@@ -1414,7 +1303,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCges5eypnph2O6ryJmb5rsTceZft9S4Os",
@@ -1499,62 +1388,41 @@
       stopSnapshots();
       remoteReady = false;
       remoteCards = new Map();
-      const sharedQuery = query(cardsRef, where('visibility', '==', 'shared'));
-      const ownQuery = query(cardsRef, where('ownerUid', '==', user.uid));
-      let sharedLoaded = false, ownLoaded = false, migrationStarted = false;
+      let migrationStarted = false;
       let legacyCards = [];
       try { legacyCards = JSON.parse(localStorage.getItem('postit_custom_cards')) || []; } catch { legacyCards = []; }
 
-      const updateReady = async () => {
-        if (!sharedLoaded || !ownLoaded) return;
+      snapshotStops.push(onSnapshot(cardsRef, async snap => {
+        remoteCards.clear();
+        snap.forEach(d => {
+          const data = d.data();
+          // setup용 문서 등 포스트잇 데이터가 아닌 문서는 목록에서 제외합니다.
+          if (typeof data.title !== 'string' || !data.title.trim()) return;
+          remoteCards.set(d.id, { ...data, id: d.id, visibility: 'shared' });
+        });
+
         if (!migrationStarted) {
           migrationStarted = true;
           try {
-            // 기존 브라우저에만 있던 카드도 모두 공용 카드로 옮깁니다.
+            // 이 브라우저에만 남아 있던 카드 중 서버에 없는 카드만 공용 목록에 추가합니다.
             for (const card of legacyCards) {
-              if (!card || !card.id) continue;
-              const existing = remoteCards.get(card.id);
-              const migrated = { ...(existing || {}), ...card, id: card.id,
-                ownerUid: (existing && existing.ownerUid) || user.uid,
-                visibility: 'shared', updatedAt: Date.now() };
-              await setDoc(doc(db, 'postits', card.id), migrated, { merge: true });
-            }
-            // 예전에 개인 카드로 저장된 이 계정 소유 카드도 공용으로 전환합니다.
-            for (const [id, card] of remoteCards) {
-              if (card.ownerUid === user.uid && card.visibility !== 'shared') {
-                await setDoc(doc(db, 'postits', id), { ...card, visibility: 'shared', updatedAt: Date.now() }, { merge: true });
-              }
+              if (!card || !card.id || !card.title || remoteCards.has(card.id)) continue;
+              await setDoc(doc(db, 'postits', card.id), {
+                ...card, id: card.id, ownerUid: user.uid, visibility: 'shared', updatedAt: Date.now()
+              }, { merge: true });
             }
           } catch (error) {
             console.error(error);
-            setStatus('기존 포스트잇을 공용으로 옮기지 못했습니다. Firestore 규칙을 확인해주세요.', true);
+            setStatus('기존 포스트잇을 동기화하지 못했습니다. Firestore 규칙을 확인해주세요.', true);
           }
         }
         remoteReady = true;
         drawRemoteCards();
         setStatus('로그인 및 동기화 완료 · 모든 로그인 사용자가 같은 포스트잇을 함께 사용합니다.');
-      };
-
-      snapshotStops.push(onSnapshot(sharedQuery, snap => {
-        sharedLoaded = true;
-        remoteCards.clear();
-        snap.forEach(d => remoteCards.set(d.id, { ...d.data(), id: d.id, visibility: 'shared' }));
-        updateReady();
-      }, error => { setStatus('공용 포스트잇을 불러오지 못했습니다. Firestore 규칙을 확인해주세요.', true); console.error(error); }));
-
-      snapshotStops.push(onSnapshot(ownQuery, snap => {
-        ownLoaded = true;
-        snap.forEach(d => {
-          const card = { ...d.data(), id: d.id };
-          if (card.visibility !== 'shared') {
-            // 기존 개인 카드를 해당 소유자가 로그인하면 공용 카드로 전환합니다.
-            setDoc(doc(db, 'postits', d.id), { ...card, visibility: 'shared', updatedAt: Date.now() }, { merge: true })
-              .catch(error => { console.error(error); setStatus('기존 포스트잇을 공용으로 전환하지 못했습니다.', true); });
-          }
-          remoteCards.set(d.id, { ...card, visibility: 'shared' });
-        });
-        updateReady();
-      }, error => { setStatus('내 기존 포스트잇을 확인하지 못했습니다. Firestore 규칙을 확인해주세요.', true); console.error(error); }));
+      }, error => {
+        setStatus('포스트잇을 불러오지 못했습니다. Firestore 규칙을 확인해주세요.', true);
+        console.error(error);
+      }));
     }
 
     // 기존 저장 함수와 연결해 카드 추가·수정·삭제를 Firestore에 반영합니다.
@@ -1592,12 +1460,16 @@
       remoteReady = false;
       remoteCards = new Map();
       if (!user) {
+        document.body.classList.add('signed-out');
+        document.getElementById('boardContent').classList.add('hidden');
         userLabel.textContent = '';
         authControls.classList.remove('hidden');
         signedInControls.classList.add('hidden');
         setStatus('로그인하면 세 사람이 함께 쓰는 포스트잇이 동기화됩니다.');
         return;
       }
+      document.body.classList.remove('signed-out');
+      document.getElementById('boardContent').classList.remove('hidden');
       userLabel.textContent = user.email || '로그인 사용자';
       authControls.classList.add('hidden');
       signedInControls.classList.remove('hidden');
