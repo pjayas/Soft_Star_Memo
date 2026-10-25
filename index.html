@@ -19,9 +19,7 @@
     body {
       font-family: 'Noto Sans KR', sans-serif;
       background-color: #f0f2f5;
-      background-image:
-        radial-gradient(#cbd5e1 1px, transparent 1px),
-        radial-gradient(#cbd5e1 1px, #f0f2f5 1px);
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px), radial-gradient(#cbd5e1 1px, #f0f2f5 1px);
       background-size: 40px 40px;
       background-position: 0 0, 20px 20px;
       min-height: 100vh;
@@ -34,17 +32,13 @@
     @media (min-width: 1180px) { .sticky-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
     .sticky-note {
-      position: relative;
-      border-radius: 2px 2px 2px 24px;
-      padding: 1.25rem;
+      position: relative; border-radius: 2px 2px 2px 24px; padding: 1.25rem;
       transition: all 0.25s ease-in-out;
       box-shadow: 3px 5px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
-      break-inside: avoid;
-      align-self: start;
+      break-inside: avoid; align-self: start;
     }
     .sticky-note:hover {
-      transform: scale(1.02) rotate(0deg) !important;
-      z-index: 20;
+      transform: scale(1.02) rotate(0deg) !important; z-index: 20;
       box-shadow: 8px 16px 24px rgba(0,0,0,0.18), 0 4px 8px rgba(0,0,0,0.1);
     }
     .sticky-note::after {
@@ -69,14 +63,10 @@
     .note-orange { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-top: 28px solid #fb8c00; }
 
     .note-pin {
-      position: absolute; top: -18px; left: 50%;
-      width: 80px; height: 22px;
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(2px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-      transform: translateX(-50%) rotate(-2deg);
-      pointer-events: none;
+      position: absolute; top: -18px; left: 50%; width: 80px; height: 22px;
+      background: rgba(255,255,255,0.6); backdrop-filter: blur(2px);
+      border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      transform: translateX(-50%) rotate(-2deg); pointer-events: none;
     }
 
     .tilt-left-1 { transform: rotate(-1.2deg); }
@@ -85,47 +75,22 @@
     .tilt-right-2 { transform: rotate(2.3deg); }
     .tilt-zero { transform: rotate(0deg); }
 
-    details > summary {
-      list-style: none; cursor: pointer; user-select: none; font-weight: 700; color: #0f172a;
-      display: flex; align-items: center; justify-content: space-between; outline: none;
-    }
+    details > summary { list-style: none; cursor: pointer; user-select: none; font-weight: 700; color: #0f172a; display: flex; align-items: center; justify-content: space-between; outline: none; }
     details > summary::-webkit-details-marker { display: none; }
     .toggle-icon { transition: transform 0.2s ease; width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
     details[open] .toggle-icon { transform: rotate(180deg); }
 
-    .card-content {
-      margin-top: 0.85rem; padding-top: 0.85rem;
-      border-top: 1px solid #cbd5e1;
-      font-size: 0.9rem; line-height: 1.55;
-    }
-    .flow {
-      background-color: rgba(255, 255, 255, 0.65); border-left: 3px solid #3b82f6;
-      padding: 0.5rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin: 0.5rem 0; font-weight: 500;
-    }
-    .warning {
-      background-color: rgba(254, 242, 242, 0.85); border-left: 3px solid #ef4444; color: #991b1b;
-      padding: 0.5rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin: 0.5rem 0; font-size: 0.85rem;
-    }
-    .memory {
-      background-color: rgba(240, 253, 244, 0.9); border: 1px dashed #22c55e; color: #14532d;
-      padding: 0.5rem 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0; font-weight: 600;
-      display: flex; align-items: center; gap: 0.375rem;
-    }
-    .badge {
-      display: inline-block; padding: 0.15rem 0.5rem; font-size: 0.7rem; font-weight: 700;
-      border-radius: 9999px; text-transform: uppercase; margin-bottom: 0.4rem;
-    }
+    .card-content { margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px solid #cbd5e1; font-size: 0.9rem; line-height: 1.55; }
+    .flow { background-color: rgba(255,255,255,0.65); border-left: 3px solid #3b82f6; padding: 0.5rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin: 0.5rem 0; font-weight: 500; }
+    .warning { background-color: rgba(254,242,242,0.85); border-left: 3px solid #ef4444; color: #991b1b; padding: 0.5rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin: 0.5rem 0; font-size: 0.85rem; }
+    .memory { background-color: rgba(240,253,244,0.9); border: 1px dashed #22c55e; color: #14532d; padding: 0.5rem 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0; font-weight: 600; display: flex; align-items: center; gap: 0.375rem; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; font-size: 0.7rem; font-weight: 700; border-radius: 9999px; text-transform: uppercase; margin-bottom: 0.4rem; }
     .badge-cell { background-color: #dbeafe; color: #1e40af; }
     .badge-bio  { background-color: #fef3c7; color: #92400e; }
     .badge-gen  { background-color: #f3e8ff; color: #6b21a8; }
     .badge-mol  { background-color: #ccfbf1; color: #115e59; }
     .badge-phys { background-color: #dcfce7; color: #166534; }
     .badge-eco  { background-color: #ffe4e6; color: #9f1239; }
-
-    svg text { font-family: 'Noto Sans KR', sans-serif; }
-
-    .filter-btn.active { background-color: #1e293b; color: #ffffff; border-color: #1e293b; }
-
     .badge-x0 { background-color: #fce7f3; color: #9d174d; }
     .badge-x1 { background-color: #ccfbf1; color: #115e59; }
     .badge-x2 { background-color: #e0f2fe; color: #075985; }
@@ -133,7 +98,9 @@
     .badge-x4 { background-color: #ffe4e6; color: #9f1239; }
     .badge-x5 { background-color: #e2e8f0; color: #334155; }
 
-    /* ===== 표·그림이 들어간 카드 ===== */
+    svg text { font-family: 'Noto Sans KR', sans-serif; }
+    .filter-btn.active { background-color: #1e293b; color: #ffffff; border-color: #1e293b; }
+
     .rich-content { overflow-x: auto; }
     .rich-content h3 { font-size: 1em; font-weight: 700; margin: 16px 0 6px; }
     .rich-content p { margin: 6px 0; }
@@ -150,39 +117,27 @@
     .rich-content .source-note { font-size: .8em; opacity: .8; }
     @media (min-width: 768px) { .sticky-note.rich:has(details[open]) { grid-column: span 2; } }
 
-    /* ===== 삭제 버튼 / 모달 / 토스트 ===== */
-    .del-btn {
-      position: absolute; top: -25px; right: 6px; width: 22px; height: 22px;
-      border-radius: 9999px; background: rgba(255,255,255,.3); color: #fff;
-      font-weight: 700; font-size: 13px; line-height: 22px; text-align: center;
+    .del-btn, .edit-btn {
+      position: absolute; top: -25px; width: 22px; height: 22px; border-radius: 9999px;
+      background: rgba(255,255,255,.3); color: #fff; font-size: 13px; line-height: 22px; text-align: center;
       border: 0; cursor: pointer; z-index: 5; transition: background .15s;
     }
+    .del-btn { right: 6px; font-weight: 700; }
+    .edit-btn { right: 32px; font-size: 12px; }
     .del-btn:hover { background: #ef4444; }
-    .edit-btn {
-      position: absolute; top: -25px; right: 32px; width: 22px; height: 22px;
-      border-radius: 9999px; background: rgba(255,255,255,.3); color: #fff;
-      font-size: 12px; line-height: 22px; text-align: center;
-      border: 0; cursor: pointer; z-index: 5; transition: background .15s;
-    }
     .edit-btn:hover { background: #0ea5e9; }
-    .modal-bg {
-      position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none;
-      align-items: center; justify-content: center; z-index: 100; padding: 1rem;
-    }
+    .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
     .modal-bg.show { display: flex; }
-    .swatch {
-      width: 28px; height: 28px; border-radius: 9999px; border: 3px solid transparent;
-      cursor: pointer; display: inline-block; transition: transform .15s;
-    }
+    .swatch { width: 28px; height: 28px; border-radius: 9999px; border: 3px solid transparent; cursor: pointer; display: inline-block; transition: transform .15s; }
     input[name="newColor"]:checked + .swatch { border-color: #1e293b; transform: scale(1.15); }
-    #toast {
-      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: #1e293b; color: #fff; padding: .6rem 1.1rem; border-radius: 9999px;
-      font-size: .8rem; font-weight: 600; opacity: 0; pointer-events: none;
-      transition: all .25s; z-index: 200;
-    }
+    #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px); background: #1e293b; color: #fff; padding: .6rem 1.1rem; border-radius: 9999px; font-size: .8rem; font-weight: 600; opacity: 0; pointer-events: none; transition: all .25s; z-index: 200; }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  
+
+    /* 동기화 준비 전에는 편집 버튼을 흐리게 */
+    body:not(.sync-ready) #bottomBar button.primary,
+    body:not(.sync-ready) .edit-btn,
+    body:not(.sync-ready) .del-btn { opacity: .45; }
+
     /* ===== iPhone 최적화 ===== */
     html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     * { -webkit-tap-highlight-color: transparent; }
@@ -236,7 +191,6 @@
     .rich-content svg { min-width: 640px; }
     .rich-content .diagram::before { content: "↔ 좌우로 밀어서 보기"; display: block; font-size: .8rem; color: #475569; margin-bottom: 4px; }
 
-    /* 입력창: 바닥에서 올라오는 시트 + 확대 방지(16px) */
     .modal-bg { align-items: flex-end !important; padding: 0 !important; }
     #modal > div { border-radius: 22px 22px 0 0 !important; max-width: none !important; width: 100% !important; max-height: 92dvh !important; padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom)) !important; }
     #modal input, #modal select, #modal textarea { font-size: 16px !important; min-height: 46px; border-radius: 12px !important; }
@@ -246,7 +200,6 @@
     .swatch { width: 38px !important; height: 38px !important; }
     #swatches label[title="직접 고르기"] { width: 38px !important; height: 38px !important; }
 
-    /* 하단 고정 바 / 더보기 시트 */
     body.signed-out #bottomBar, body.signed-out #modal, body.signed-out #menuSheet { display: none !important; }
     #bottomBar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; display: flex; gap: .6rem;
       padding: .6rem max(.75rem, env(safe-area-inset-right)) calc(.6rem + env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
@@ -290,7 +243,6 @@
     </section>
 
     <div id="boardContent" class="hidden">
-    <!-- Header -->
     <header class="mb-8 text-center relative bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-200/80">
       <div class="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold tracking-wider uppercase mb-2">
         MPE / MEET / DEET / 임용고시 핵심
@@ -303,7 +255,6 @@
       </p>
 
       <div class="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
-
         <div class="flex flex-wrap justify-center gap-1.5" id="categoryFilters">
           <button onclick="filterCategory('all')" class="filter-btn active px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-300 transition hover:bg-slate-100">전체보기</button>
         </div>
@@ -323,9 +274,7 @@
       </div>
     </header>
 
-    <!-- Cards Grid (메모 내용 비움) -->
-    <main class="sticky-grid" id="cardsGrid">
-    </main>
+    <main class="sticky-grid" id="cardsGrid"></main>
 
     <div id="noResults" class="hidden text-center py-12 bg-white/50 rounded-2xl border border-dashed border-slate-300 mt-6">
       <p class="text-slate-500 font-medium">표시할 포스트잇이 없습니다. 검색어를 바꾸거나 ＋ 새 포스트잇으로 추가해보세요.</p>
@@ -429,18 +378,14 @@
       document.getElementById('noResults').classList.toggle('hidden', visible > 0);
     }
 
-    /* ========== 새 포스트잇 생성 / 수정 / 삭제 (localStorage) ========== */
+    /* ========== 포스트잇 생성 / 수정 / 삭제 ========== */
+    /* localStorage는 Firebase 데이터의 캐시로만 사용합니다 (원본은 Firestore). */
     const LS_CARDS = 'postit_custom_cards';
     const LS_HIDDEN = 'postit_hidden_builtin';
-    
-    /* 새롭게 지정된 6가지 분야(뱃지) 매핑 */
+
     const BADGE = {
-      '세포생물학': 'badge-cell',
-      '생화학': 'badge-bio',
-      '유전학': 'badge-gen',
-      '분자생물학': 'badge-mol',
-      '인체생리학': 'badge-phys',
-      '식생분진': 'badge-eco'
+      '세포생물학': 'badge-cell', '생화학': 'badge-bio', '유전학': 'badge-gen',
+      '분자생물학': 'badge-mol', '인체생리학': 'badge-phys', '식생분진': 'badge-eco'
     };
 
     const TILTS = ['tilt-left-1','tilt-right-1','tilt-left-2','tilt-right-2','tilt-zero'];
@@ -450,23 +395,22 @@
     const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     function loadList(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch (e) { return []; } }
     function saveList(k, v) {
-      try {
-        localStorage.setItem(k, JSON.stringify(v));
-        if ((k === 'postit_custom_categories' || k === 'postit_builtin_cat_names') && typeof window.syncCategoryListToFirebase === 'function') {
-          window.syncCategoryListToFirebase(k, v);
-        }
-        return true;
-      } catch (e) {
-        alert('저장에 실패했습니다. 브라우저의 저장소 차단 여부를 확인해주세요.');
-        return false;
-      }
+      try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+      catch (e) { alert('저장에 실패했습니다. 브라우저의 저장소 차단 여부를 확인해주세요.'); return false; }
     }
     let toastTimer;
     function toast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg; t.classList.add('show');
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    /* 로그인 + 동기화 준비가 끝나기 전에는 편집을 막습니다 */
+    function requireReady() {
+      if (!window.fbCurrentUser) { alert('포스트잇을 추가하거나 수정하려면 먼저 로그인해주세요.'); return false; }
+      if (!window.fbReady) { toast('동기화 중입니다. 잠시 후 다시 시도해주세요.'); return false; }
+      return true;
     }
 
     const RICH_BAD = new Set(['SCRIPT','STYLE','IFRAME','OBJECT','EMBED','LINK','META','FORM','INPUT','BUTTON','TEXTAREA','SELECT','BASE','FRAME','FRAMESET','AUDIO','VIDEO','IMG','FOREIGNOBJECT','USE','ANIMATE','SET']);
@@ -480,7 +424,7 @@
           else if (n === 'href' || n === 'xlink:href' || n === 'src') {
             if (!/^(https?:|#)/i.test(v)) el.removeAttribute(a.name);
           } else if (n === 'style') {
-            if (!/^[\w\s:;.%\-#(),]*$/.test(v) || /url\(|expression|import/i.test(v)) el.removeAttribute(a.name);
+            if (!/^[\w\s:;.%\\-#(),]*$/.test(v) || /url\(|expression|import/i.test(v)) el.removeAttribute(a.name);
           }
         });
         if (el.tagName.toUpperCase() === 'A') { el.target = '_blank'; el.rel = 'noopener noreferrer'; }
@@ -498,6 +442,7 @@
         el.style.background = `linear-gradient(135deg, ${mixWhite(c.color, 0.9)} 0%, ${mixWhite(c.color, 0.72)} 100%)`;
         el.style.borderTopColor = c.color;
       }
+      c.body = c.body || ''; c.memo = c.memo || ''; c.warn = c.warn || '';
       el.dataset.category = c.category;
       el.dataset.customId = c.id;
       el.dataset.keywords = (c.title + ' ' + c.body + ' ' + c.memo + ' ' + c.warn).toLowerCase();
@@ -527,14 +472,14 @@
     }
 
     function openModal(card) {
-      if (!window.fbCurrentUser) { alert('포스트잇을 추가하거나 수정하려면 먼저 로그인해주세요.'); return; }
+      if (!requireReady()) return;
       editingId = card ? card.id : null;
       document.getElementById('modalTitle').textContent = card ? '포스트잇 수정' : '새 포스트잇 만들기';
       document.getElementById('saveBtn').textContent = card ? '저장' : '추가';
       document.getElementById('newTitle').value = card ? card.title : '';
-      document.getElementById('newBody').value = card ? card.body : '';
-      document.getElementById('newMemo').value = card ? card.memo : '';
-      document.getElementById('newWarn').value = card ? card.warn : '';
+      document.getElementById('newBody').value = card ? (card.body || '') : '';
+      document.getElementById('newMemo').value = card ? (card.memo || '') : '';
+      document.getElementById('newWarn').value = card ? (card.warn || '') : '';
       refreshCategorySelect(card ? card.category : builtinName('세포생물학'));
       setColorSelection(card ? card.color : 'yellow');
       const rich = !!(card && card.html);
@@ -549,6 +494,7 @@
     }
 
     function saveCard() {
+      if (!requireReady()) return;
       const title = document.getElementById('newTitle').value.trim();
       if (!title) { alert('제목을 입력해주세요.'); return; }
       let category = document.getElementById('newCategory').value;
@@ -560,9 +506,7 @@
       }
       registerCat(category);
       const data = {
-        title,
-        category,
-        color: getSelectedColor(),
+        title, category, color: getSelectedColor(),
         body: document.getElementById('newBody').value,
         memo: document.getElementById('newMemo').value.trim(),
         warn: document.getElementById('newWarn').value.trim()
@@ -579,7 +523,6 @@
         if (old) old.replaceWith(buildCard(list[i]));
         toast('수정되었습니다');
       } else {
-        if (!window.fbCurrentUser) { alert('먼저 로그인해주세요.'); return; }
         const card = Object.assign({ id: 'c' + Date.now(), tilt: TILTS[Math.floor(Math.random() * TILTS.length)], ownerUid: window.fbCurrentUser.uid, visibility: 'shared' }, data);
         list.push(card);
         if (!saveList(LS_CARDS, list)) return;
@@ -591,12 +534,14 @@
     }
 
     function editCard(btn) {
+      if (!requireReady()) return;
       const id = btn.closest('.sticky-note').dataset.customId;
       const card = loadList(LS_CARDS).find(c => c.id === id);
       if (card) openModal(card);
     }
 
     function deleteCard(btn) {
+      if (!requireReady()) return;
       const card = btn.closest('.sticky-note');
       const name = card.querySelector('h3').textContent;
       if (!confirm(`"${name}" 포스트잇을 삭제할까요?`)) return;
@@ -612,21 +557,14 @@
       toast('삭제되었습니다');
     }
 
-
     /* ========== 색상 선택 ========== */
     const COLOR_PRESETS = [
-      { id: 'yellow', hex: '#fbc02d', label: '노랑' },
-      { id: 'orange', hex: '#fb8c00', label: '주황' },
-      { id: 'red',    hex: '#e53935', label: '빨강' },
-      { id: 'pink',   hex: '#ec407a', label: '분홍' },
-      { id: 'purple', hex: '#8e24aa', label: '보라' },
-      { id: 'blue',   hex: '#1e88e5', label: '파랑' },
-      { id: 'sky',    hex: '#29b6f6', label: '하늘' },
-      { id: 'teal',   hex: '#00897b', label: '청록' },
-      { id: 'green',  hex: '#43a047', label: '초록' },
-      { id: 'lime',   hex: '#afb42b', label: '라임' },
-      { id: 'brown',  hex: '#8d6e63', label: '갈색' },
-      { id: 'gray',   hex: '#78909c', label: '회색' }
+      { id: 'yellow', hex: '#fbc02d', label: '노랑' }, { id: 'orange', hex: '#fb8c00', label: '주황' },
+      { id: 'red', hex: '#e53935', label: '빨강' }, { id: 'pink', hex: '#ec407a', label: '분홍' },
+      { id: 'purple', hex: '#8e24aa', label: '보라' }, { id: 'blue', hex: '#1e88e5', label: '파랑' },
+      { id: 'sky', hex: '#29b6f6', label: '하늘' }, { id: 'teal', hex: '#00897b', label: '청록' },
+      { id: 'green', hex: '#43a047', label: '초록' }, { id: 'lime', hex: '#afb42b', label: '라임' },
+      { id: 'brown', hex: '#8d6e63', label: '갈색' }, { id: 'gray', hex: '#78909c', label: '회색' }
     ];
 
     function mixWhite(hex, t) {
@@ -674,6 +612,9 @@
     }
 
     /* ========== 분야(카테고리) 관리 ========== */
+    /* 분야 설정의 원본은 Firestore입니다. 변경은 트랜잭션(fbCatOp)으로 "변경 내용만" 적용하므로
+       여러 사람이 동시에 수정해도 서로의 변경을 덮어쓰지 않습니다.
+       localStorage 값은 Firestore 스냅샷이 도착할 때마다 갱신되는 캐시입니다. */
     const LS_CATS = 'postit_custom_categories';
     const LS_BNAMES = 'postit_builtin_cat_names';
     const ORIG_CATS = Object.keys(BADGE);
@@ -695,18 +636,17 @@
 
     function registerCat(name) {
       if (!name || builtinNames().includes(name) || name === '전체보기') return;
-      const list = loadList(LS_CATS);
-      if (list.includes(name)) return;
-      list.push(name);
-      saveList(LS_CATS, list);
-      renderCatButtons();
-      refreshCategorySelect(name);
+      if (loadList(LS_CATS).includes(name)) return;
+      if (!window.fbCurrentUser || !window.fbReady || !window.fbCatOp) return;
+      window.fbCatOp(s => { if (!s.categories.includes(name)) s.categories.push(name); })
+        .catch(err => { console.error(err); toast('분야 저장에 실패했습니다.'); });
     }
 
     function refreshCategorySelect(selected) {
       const sel = document.getElementById('newCategory');
       const keep = selected !== undefined ? selected : sel.value;
       const cats = allCats();
+      if (keep && keep !== '__new__' && !cats.includes(keep)) cats.push(keep);
       sel.innerHTML = '';
       cats.forEach(n => {
         const o = document.createElement('option');
@@ -752,12 +692,19 @@
       };
       builtinNames().forEach(n => addBtn(n, false));
       loadList(LS_CATS).forEach(n => addBtn(n, true));
+      /* HTML에 직접 넣은 기본 카드의 분야 표시 갱신 */
+      document.querySelectorAll('#cardsGrid > article[data-orig-category]').forEach(el => {
+        const bn = builtinName(el.dataset.origCategory);
+        el.dataset.category = bn;
+        const bd = el.querySelector('.badge'); if (bd) bd.textContent = bn;
+      });
       const label = currentCategory === 'all' ? '전체보기' : currentCategory;
       box.querySelectorAll('.filter-btn').forEach(btn =>
         btn.classList.toggle('active', (btn.dataset.cat || btn.textContent.trim()) === label));
     }
 
     function renameCategory(oldName) {
+      if (!requireReady()) return;
       const orig = origOf(oldName);
       const input = prompt(`"${oldName}" 분야의 새 이름을 입력하세요 (12자 이내)`, oldName);
       if (input === null) return;
@@ -765,42 +712,26 @@
       if (!name || name === oldName) return;
       if (name.length > 12) { alert('분야 이름은 12자 이내로 입력해주세요.'); return; }
       if (name === '전체보기' || allCats().includes(name)) { alert('이미 있거나 사용할 수 없는 이름입니다.'); return; }
-      if (orig) {
-        const map = loadMap(LS_BNAMES);
-        if (name === orig) delete map[orig]; else map[orig] = name;
-        if (!saveList(LS_BNAMES, map)) return;
-      } else if (!saveList(LS_CATS, loadList(LS_CATS).map(n => n === oldName ? name : n))) return;
-      const cards = loadList(LS_CARDS).map(c => c.category === oldName ? Object.assign(c, { category: name }) : c);
-      if (!saveList(LS_CARDS, cards)) return;
-      if (currentCategory === oldName) currentCategory = name;
-      const grid = document.getElementById('cardsGrid');
-      if (orig) {
-        grid.querySelectorAll('[data-orig-category]').forEach(el => {
-          if (el.dataset.origCategory === orig) {
-            el.dataset.category = name;
-            el.querySelector('.badge').textContent = name;
-          }
-        });
-      }
-      grid.querySelectorAll('[data-custom-id]').forEach(el => el.remove());
-      cards.forEach(c => grid.prepend(buildCard(c)));
-      renderCatButtons();
-      refreshCategorySelect();
-      applyFilters();
-      toast('분야 이름이 변경되었습니다');
+      /* 분야 목록 + 해당 분야의 모든 포스트잇을 한 번의 트랜잭션으로 함께 변경 (일부만 바뀌지 않음) */
+      const affected = loadList(LS_CARDS).filter(c => c.category === oldName).map(c => c.id);
+      window.fbCatOp(s => {
+        if (orig) { if (name === orig) delete s.builtinNames[orig]; else s.builtinNames[orig] = name; }
+        else s.categories = s.categories.map(n => n === oldName ? name : n);
+      }, affected.map(id => ({ id, category: name })))
+        .then(() => { if (currentCategory === oldName) currentCategory = name; toast('분야 이름이 변경되었습니다'); })
+        .catch(err => { console.error(err); alert('분야 이름 변경에 실패했습니다. 아무것도 변경되지 않았습니다. 네트워크와 Firestore 규칙을 확인해주세요.'); });
     }
 
     function deleteCategory(name) {
+      if (!requireReady()) return;
       if (loadList(LS_CARDS).some(c => c.category === name)) {
         alert(`"${name}" 분야를 사용하는 카드가 있어 삭제할 수 없습니다.\n카드를 삭제하거나 다른 분야로 수정한 뒤 다시 시도해주세요.`);
         return;
       }
       if (!confirm(`"${name}" 분야를 삭제할까요?`)) return;
-      saveList(LS_CATS, loadList(LS_CATS).filter(n => n !== name));
-      if (currentCategory === name) filterCategory('all');
-      renderCatButtons();
-      refreshCategorySelect();
-      toast('분야가 삭제되었습니다');
+      window.fbCatOp(s => { s.categories = s.categories.filter(n => n !== name); })
+        .then(() => { if (currentCategory === name) filterCategory('all'); toast('분야가 삭제되었습니다'); })
+        .catch(err => { console.error(err); alert('분야 삭제에 실패했습니다.'); });
     }
 
     function openMenu() { document.getElementById('menuSheet').classList.add('show'); }
@@ -829,8 +760,7 @@
         b.setAttribute('onclick', 'deleteCard(this)');
         card.insertBefore(b, card.querySelector('details'));
       });
-      const grid = document.getElementById('cardsGrid');
-      loadList(LS_CARDS).forEach(c => { registerCat(c.category); grid.prepend(buildCard(c)); });
+      /* 로그인 전에는 캐시된 포스트잇을 그리지 않습니다. Firestore에서 받은 뒤에만 표시합니다. */
       renderSwatches();
       renderCatButtons();
       refreshCategorySelect();
@@ -841,7 +771,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCges5eypnph2O6ryJmb5rsTceZft9S4Os",
@@ -856,6 +786,8 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const cardsRef = collection(db, 'postits');
+    const CATEGORY_SETTINGS_ID = '__category_settings__';
+    const catRef = doc(db, 'postits', CATEGORY_SETTINGS_ID);
     const statusEl = document.getElementById('firebaseStatus');
     const userLabel = document.getElementById('firebaseUserLabel');
     const authControls = document.getElementById('authControls');
@@ -867,11 +799,16 @@
     let remoteReady = false;
     let remoteCards = new Map();
     let writeQueue = Promise.resolve();
-    let applyingRemoteCategories = false;
     let categorySettingsSeen = false;
-    const CATEGORY_SETTINGS_ID = '__category_settings__';
+    let categoryInitStarted = false;
 
     window.fbCurrentUser = null;
+    window.fbReady = false;
+    function setReady(v) {
+      remoteReady = v;
+      window.fbReady = v;
+      document.body.classList.toggle('sync-ready', v);
+    }
     function setStatus(message, isError = false) {
       statusEl.textContent = message;
       statusEl.className = 'text-xs mt-1 ' + (isError ? 'text-red-600' : 'text-slate-500');
@@ -906,6 +843,24 @@
       catch (error) { showAuthError(error); }
     };
 
+    /* 분야 설정 변경용 트랜잭션.
+       - fn(s, exists): 현재 서버 값(s.categories, s.builtinNames)에 "변경 내용만" 적용
+       - cardUpdates: [{id, category}] 같은 트랜잭션에서 함께 바꿀 포스트잇
+       트랜잭션이므로 모두 성공하거나 모두 실패하고, 동시 수정 시 자동으로 재시도됩니다. */
+    window.fbCatOp = function (fn, cardUpdates = []) {
+      return runTransaction(db, async tx => {
+        const snap = await tx.get(catRef);
+        const cur = snap.exists() ? snap.data() : {};
+        const s = {
+          categories: Array.isArray(cur.categories) ? [...cur.categories] : [],
+          builtinNames: (cur.builtinNames && typeof cur.builtinNames === 'object') ? { ...cur.builtinNames } : {}
+        };
+        fn(s, snap.exists());
+        tx.set(catRef, { type: 'category_settings', categories: s.categories, builtinNames: s.builtinNames, updatedAt: Date.now() }, { merge: true });
+        cardUpdates.forEach(u => tx.update(doc(db, 'postits', u.id), { category: u.category, updatedAt: Date.now() }));
+      });
+    };
+
     function stopSnapshots() {
       snapshotStops.forEach(stop => stop());
       snapshotStops = [];
@@ -913,116 +868,90 @@
     function drawRemoteCards() {
       const grid = document.getElementById('cardsGrid');
       grid.querySelectorAll(':scope > article[data-custom-id]').forEach(el => el.remove());
-      const cards = Array.from(remoteCards.values());
+      const cards = Array.from(remoteCards.values()).sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
       applyingRemote = true;
       originalSaveList('postit_custom_cards', cards);
       applyingRemote = false;
       cards.forEach(card => {
-        if (typeof window.registerCat === 'function') window.registerCat(card.category);
+        window.registerCat(card.category);
         grid.prepend(window.buildCard(card));
       });
-      if (typeof window.renderCatButtons === 'function') window.renderCatButtons();
-      if (typeof window.refreshCategorySelect === 'function') window.refreshCategorySelect();
-      if (typeof window.applyFilters === 'function') window.applyFilters();
+      window.renderCatButtons();
+      window.refreshCategorySelect();
+      window.applyFilters();
     }
+
     function startSnapshots(user) {
       stopSnapshots();
-      remoteReady = false;
+      setReady(false);
       remoteCards = new Map();
+      categorySettingsSeen = false;
+      categoryInitStarted = false;
       let migrationStarted = false;
       let legacyCards = [];
       try { legacyCards = JSON.parse(localStorage.getItem('postit_custom_cards')) || []; } catch { legacyCards = []; }
+      /* 예전(Firebase 도입 전) 카드만 이전: ownerUid가 없는 카드.
+         이미 동기화되던 카드는 다른 사람이 삭제했을 수 있으므로 다시 올리지 않습니다. */
+      legacyCards = legacyCards.filter(c => c && c.id && c.title && !c.ownerUid);
 
       snapshotStops.push(onSnapshot(cardsRef, async snap => {
         remoteCards.clear();
         let remoteCategorySettings = null;
         snap.forEach(d => {
           const data = d.data();
-          if (d.id === CATEGORY_SETTINGS_ID && data.type === 'category_settings') {
-            remoteCategorySettings = data;
-            return;
-          }
+          if (d.id === CATEGORY_SETTINGS_ID && data.type === 'category_settings') { remoteCategorySettings = data; return; }
           if (typeof data.title !== 'string' || !data.title.trim()) return;
           remoteCards.set(d.id, { ...data, id: d.id, visibility: 'shared' });
         });
 
         if (remoteCategorySettings) {
-          applyingRemoteCategories = true;
-          try {
-            localStorage.setItem('postit_custom_categories', JSON.stringify(Array.isArray(remoteCategorySettings.categories) ? remoteCategorySettings.categories : []));
-            localStorage.setItem('postit_builtin_cat_names', JSON.stringify(remoteCategorySettings.builtinNames && typeof remoteCategorySettings.builtinNames === 'object' ? remoteCategorySettings.builtinNames : {}));
-          } finally {
-            applyingRemoteCategories = false;
-          }
+          localStorage.setItem('postit_custom_categories', JSON.stringify(Array.isArray(remoteCategorySettings.categories) ? remoteCategorySettings.categories : []));
+          localStorage.setItem('postit_builtin_cat_names', JSON.stringify(remoteCategorySettings.builtinNames && typeof remoteCategorySettings.builtinNames === 'object' ? remoteCategorySettings.builtinNames : {}));
           categorySettingsSeen = true;
-          if (typeof window.renderCatButtons === 'function') window.renderCatButtons();
-          if (typeof window.refreshCategorySelect === 'function') window.refreshCategorySelect();
-          if (typeof window.applyFilters === 'function') window.applyFilters();
-        } else if (!categorySettingsSeen) {
-          categorySettingsSeen = true;
-          const categories = (() => { try { return JSON.parse(localStorage.getItem('postit_custom_categories')) || []; } catch { return []; } })();
-          const builtinNames = (() => { try { return JSON.parse(localStorage.getItem('postit_builtin_cat_names')) || {}; } catch { return {}; } })();
-          try {
-            await setDoc(doc(db, 'postits', CATEGORY_SETTINGS_ID), {
-              type: 'category_settings', categories, builtinNames, updatedAt: Date.now()
-            }, { merge: true });
-          } catch (error) {
+        } else if (!categoryInitStarted) {
+          /* 서버에 분야 설정이 아직 없을 때만 최초 1회 생성 (이미 있으면 덮어쓰지 않음) */
+          categoryInitStarted = true;
+          const lc = JSON.parse(localStorage.getItem('postit_custom_categories') || '[]');
+          const lb = JSON.parse(localStorage.getItem('postit_builtin_cat_names') || '{}');
+          window.fbCatOp((s, exists) => {
+            if (!exists) { s.categories = Array.isArray(lc) ? lc : []; s.builtinNames = (lb && typeof lb === 'object') ? lb : {}; }
+          }).catch(error => {
             console.error(error);
-            setStatus('카테고리 설정을 동기화하지 못했습니다. Firestore 규칙을 확인해주세요.', true);
-          }
+            setStatus('분야 설정을 만들지 못했습니다. Firestore 규칙을 확인해주세요.', true);
+          });
         }
 
         if (!migrationStarted) {
           migrationStarted = true;
-          try {
+          writeQueue = writeQueue.then(async () => {
             for (const card of legacyCards) {
-              if (!card || !card.id || !card.title || remoteCards.has(card.id)) continue;
-              await setDoc(doc(db, 'postits', card.id), {
-                ...card, id: card.id, ownerUid: user.uid, visibility: 'shared', updatedAt: Date.now()
-              }, { merge: true });
+              if (remoteCards.has(card.id)) continue;
+              await setDoc(doc(db, 'postits', card.id), { ...card, id: card.id, ownerUid: user.uid, visibility: 'shared', updatedAt: Date.now() }, { merge: true });
             }
-          } catch (error) {
+          }).catch(error => {
             console.error(error);
             setStatus('기존 포스트잇을 동기화하지 못했습니다. Firestore 규칙을 확인해주세요.', true);
-          }
+          });
         }
-        remoteReady = true;
-        drawRemoteCards();
-        setStatus('로그인 및 동기화 완료 · 모든 로그인 사용자가 같은 포스트잇을 함께 사용합니다.');
+
+        /* 분야 설정까지 받은 뒤에만 편집 허용 */
+        if (categorySettingsSeen) {
+          setReady(true);
+          drawRemoteCards();
+          setStatus('로그인 및 동기화 완료 · 모든 로그인 사용자가 같은 포스트잇을 함께 사용합니다.');
+        }
       }, error => {
+        setReady(false);
         setStatus('포스트잇을 불러오지 못했습니다. Firestore 규칙을 확인해주세요.', true);
         console.error(error);
       }));
     }
 
-    window.syncCategoryListToFirebase = function (key, value) {
-      if (!currentUser || !categorySettingsSeen || applyingRemoteCategories) return;
-      const categories = (() => { try { return JSON.parse(localStorage.getItem('postit_custom_categories')) || []; } catch { return []; } })();
-      const builtinNames = (() => { try { return JSON.parse(localStorage.getItem('postit_builtin_cat_names')) || {}; } catch { return {}; } })();
-      writeQueue = writeQueue.then(() => setDoc(doc(db, 'postits', CATEGORY_SETTINGS_ID), {
-        type: 'category_settings', categories, builtinNames, updatedAt: Date.now()
-      }, { merge: true })).catch(error => {
-        console.error('카테고리 저장 동기화 오류:', error);
-        setStatus('카테고리 저장 동기화에 실패했습니다. Firestore 규칙을 확인해주세요.', true);
-      });
-    };
-
+    /* 카드 변경 → Firestore 저장. 실패하면 알리고, Firestore 상태 기준으로 화면을 되돌립니다. */
     window.saveList = function (key, value) {
       const oldValue = (() => { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } })();
       const saved = originalSaveList(key, value);
-      if (!saved || applyingRemote || applyingRemoteCategories || !currentUser) return saved;
-      if (key === 'postit_custom_categories' || key === 'postit_builtin_cat_names') {
-        if (!categorySettingsSeen) return saved;
-        const categories = (() => { try { return JSON.parse(localStorage.getItem('postit_custom_categories')) || []; } catch { return []; } })();
-        const builtinNames = (() => { try { return JSON.parse(localStorage.getItem('postit_builtin_cat_names')) || {}; } catch { return {}; } })();
-        writeQueue = writeQueue.then(() => setDoc(doc(db, 'postits', CATEGORY_SETTINGS_ID), {
-          type: 'category_settings', categories, builtinNames, updatedAt: Date.now()
-        }, { merge: true })).catch(error => {
-          console.error(error);
-          setStatus('카테고리 저장 동기화에 실패했습니다. Firestore 규칙을 확인해주세요.', true);
-        });
-        return saved;
-      }
+      if (!saved || applyingRemote || !currentUser) return saved;
       if (key !== 'postit_custom_cards' || !remoteReady) return saved;
       const oldMap = new Map(oldValue.map(c => [c.id, c]));
       const newMap = new Map(value.map(c => [c.id, c]));
@@ -1031,17 +960,16 @@
           const old = oldMap.get(id);
           if (old && JSON.stringify(old) === JSON.stringify(card)) continue;
           const ownerUid = card.ownerUid || old?.ownerUid || currentUser.uid;
-          const normalized = { ...card, id, ownerUid, visibility: 'shared', updatedAt: Date.now() };
-          await setDoc(doc(db, 'postits', id), normalized, { merge: true });
+          await setDoc(doc(db, 'postits', id), { ...card, id, ownerUid, visibility: 'shared', updatedAt: Date.now() }, { merge: true });
         }
-        for (const [id, old] of oldMap) {
-          if (!newMap.has(id)) {
-            await deleteDoc(doc(db, 'postits', id));
-          }
+        for (const [id] of oldMap) {
+          if (!newMap.has(id)) await deleteDoc(doc(db, 'postits', id));
         }
       }).catch(error => {
         console.error(error);
         setStatus('저장 동기화에 실패했습니다. 로그인 상태와 Firestore 규칙을 확인해주세요.', true);
+        window.toast('저장에 실패해 서버 상태로 되돌립니다.');
+        drawRemoteCards();
       });
       return saved;
     };
@@ -1050,12 +978,13 @@
       currentUser = user;
       window.fbCurrentUser = user;
       stopSnapshots();
-      remoteReady = false;
+      setReady(false);
       remoteCards = new Map();
       categorySettingsSeen = false;
       if (!user) {
         document.body.classList.add('signed-out');
         document.getElementById('boardContent').classList.add('hidden');
+        document.getElementById('cardsGrid').querySelectorAll(':scope > article[data-custom-id]').forEach(el => el.remove());
         userLabel.textContent = '';
         authControls.classList.remove('hidden');
         signedInControls.classList.add('hidden');
@@ -1067,7 +996,7 @@
       userLabel.textContent = user.email || '로그인 사용자';
       authControls.classList.add('hidden');
       signedInControls.classList.remove('hidden');
-      setStatus('포스트잇을 불러오는 중입니다.');
+      setStatus('포스트잇을 불러오는 중입니다. (완료되면 편집할 수 있어요)');
       startSnapshots(user);
     });
   </script>
