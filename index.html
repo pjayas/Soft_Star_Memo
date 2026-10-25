@@ -263,6 +263,29 @@
 
   <div class="max-w-7xl mx-auto">
 
+    <!-- Firebase 로그인 -->
+    <section class="max-w-3xl mx-auto mb-5 bg-white/95 p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="font-extrabold text-slate-800">계정 및 동기화</h2>
+            <p id="firebaseStatus" class="text-xs text-slate-500 mt-1">Firebase 연결을 준비하고 있습니다.</p>
+          </div>
+          <span id="firebaseUserLabel" class="text-xs font-semibold text-slate-600"></span>
+        </div>
+        <div id="authControls" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input id="authEmail" type="email" autocomplete="email" placeholder="이메일 주소" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="비밀번호 (6자 이상)" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
+          <button type="button" onclick="firebaseSignIn()" class="px-3 py-2 text-sm font-bold bg-slate-800 text-white rounded-lg">로그인</button>
+          <button type="button" onclick="firebaseSignUp()" class="px-3 py-2 text-sm font-bold bg-sky-100 text-sky-800 rounded-lg">새 계정 만들기</button>
+        </div>
+        <div id="signedInControls" class="hidden flex-wrap items-center justify-between gap-2">
+          <p class="text-sm text-emerald-700">로그인되었습니다. 포스트잇은 자동으로 동기화됩니다.</p>
+          <button type="button" onclick="firebaseSignOut()" class="px-3 py-2 text-sm font-semibold bg-slate-100 text-slate-700 rounded-lg">로그아웃</button>
+        </div>
+      </div>
+    </section>
+
     <!-- Header -->
     <header class="mb-8 text-center relative bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-200/80">
       <div class="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold tracking-wider uppercase mb-2">
@@ -792,7 +815,7 @@
     </div>
 
     <footer class="mt-12 text-center text-xs text-slate-500 pb-8">
-      생물학 심화 스터디 보드 • 포스트잇 대시보드 • 이 브라우저에 자동 저장됩니다
+      생물학 심화 스터디 보드 • 공용·개인 포스트잇 • Firebase 자동 동기화
     </footer>
   </div>
 
@@ -801,6 +824,14 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto">
       <h2 id="modalTitle" class="text-lg font-extrabold text-slate-800 mb-3">새 포스트잇 만들기</h2>
 
+      <div class="mb-3">
+        <label class="block text-xs font-bold text-slate-600 mb-1">공개 범위</label>
+        <select id="newVisibility" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
+          <option value="shared">공용 - 로그인한 세 사람이 함께 사용</option>
+          <option value="private">개인 - 나만 볼 수 있음</option>
+        </select>
+        <p class="mt-1 text-xs text-slate-500">공용 포스트잇은 로그인한 사용자가 수정·삭제할 수 있습니다.</p>
+      </div>
       <label class="block text-xs font-bold text-slate-600 mb-1">제목 *</label>
       <input id="newTitle" maxlength="60" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400" placeholder="예: 해당과정 vs TCA 회로">
 
@@ -969,6 +1000,7 @@
     }
 
     function openModal(card) {
+      if (!window.fbCurrentUser) { alert('포스트잇을 추가하거나 수정하려면 먼저 로그인해주세요.'); return; }
       editingId = card ? card.id : null;
       document.getElementById('modalTitle').textContent = card ? '포스트잇 수정' : '새 포스트잇 만들기';
       document.getElementById('saveBtn').textContent = card ? '저장' : '추가';
@@ -976,6 +1008,8 @@
       document.getElementById('newBody').value = card ? card.body : '';
       document.getElementById('newMemo').value = card ? card.memo : '';
       document.getElementById('newWarn').value = card ? card.warn : '';
+      document.getElementById('newVisibility').value = card && card.visibility ? card.visibility : 'shared';
+      document.getElementById('newVisibility').disabled = !!(card && card.ownerUid && window.fbCurrentUser && card.ownerUid !== window.fbCurrentUser.uid);
       refreshCategorySelect(card ? card.category : builtinName('분자생물학'));
       setColorSelection(card ? card.color : 'yellow');
       const rich = !!(card && card.html);
@@ -1020,7 +1054,8 @@
         if (old) old.replaceWith(buildCard(list[i]));
         toast('수정되었습니다');
       } else {
-        const card = Object.assign({ id: 'c' + Date.now(), tilt: TILTS[Math.floor(Math.random() * TILTS.length)] }, data);
+        if (!window.fbCurrentUser) { alert('먼저 로그인해주세요.'); return; }
+        const card = Object.assign({ id: 'c' + Date.now(), tilt: TILTS[Math.floor(Math.random() * TILTS.length)], ownerUid: window.fbCurrentUser.uid, visibility: document.getElementById('newVisibility').value }, data);
         list.push(card);
         if (!saveList(LS_CARDS, list)) return;
         grid.prepend(buildCard(card));
@@ -1381,6 +1416,191 @@
       refreshCategorySelect();
       applyFilters();
     })();
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCges5eypnph2O6ryJmb5rsTceZft9S4Os",
+      authDomain: "my-postit-site.firebaseapp.com",
+      projectId: "my-postit-site",
+      storageBucket: "my-postit-site.firebasestorage.app",
+      messagingSenderId: "30120812661",
+      appId: "1:30120812661:web:05e58b00fbc65bd10c183c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const cardsRef = collection(db, 'postits');
+    const statusEl = document.getElementById('firebaseStatus');
+    const userLabel = document.getElementById('firebaseUserLabel');
+    const authControls = document.getElementById('authControls');
+    const signedInControls = document.getElementById('signedInControls');
+    const originalSaveList = window.saveList;
+    let currentUser = null;
+    let snapshotStops = [];
+    let applyingRemote = false;
+    let remoteReady = false;
+    let remoteCards = new Map();
+    let writeQueue = Promise.resolve();
+
+    window.fbCurrentUser = null;
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.className = 'text-xs mt-1 ' + (isError ? 'text-red-600' : 'text-slate-500');
+    }
+    function showAuthError(error) {
+      const messages = {
+        'auth/email-already-in-use': '이미 사용 중인 이메일입니다.',
+        'auth/invalid-email': '이메일 주소 형식을 확인해주세요.',
+        'auth/weak-password': '비밀번호는 6자 이상으로 설정해주세요.',
+        'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
+        'auth/network-request-failed': '네트워크 연결을 확인해주세요.'
+      };
+      setStatus(messages[error.code] || ('오류가 발생했습니다: ' + error.message), true);
+    }
+
+    window.firebaseSignUp = async function () {
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      if (!email || !password) { setStatus('이메일과 비밀번호를 입력해주세요.', true); return; }
+      try { await createUserWithEmailAndPassword(auth, email, password); }
+      catch (error) { showAuthError(error); }
+    };
+    window.firebaseSignIn = async function () {
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      if (!email || !password) { setStatus('이메일과 비밀번호를 입력해주세요.', true); return; }
+      try { await signInWithEmailAndPassword(auth, email, password); }
+      catch (error) { showAuthError(error); }
+    };
+    window.firebaseSignOut = async function () {
+      try { await signOut(auth); }
+      catch (error) { showAuthError(error); }
+    };
+
+    function stopSnapshots() {
+      snapshotStops.forEach(stop => stop());
+      snapshotStops = [];
+    }
+    function drawRemoteCards() {
+      const grid = document.getElementById('cardsGrid');
+      grid.querySelectorAll(':scope > article[data-custom-id]').forEach(el => el.remove());
+      const cards = Array.from(remoteCards.values());
+      applyingRemote = true;
+      originalSaveList('postit_custom_cards', cards);
+      applyingRemote = false;
+      cards.forEach(card => {
+        if (typeof window.registerCat === 'function') window.registerCat(card.category);
+        grid.prepend(window.buildCard(card));
+      });
+      if (typeof window.renderCatButtons === 'function') window.renderCatButtons();
+      if (typeof window.refreshCategorySelect === 'function') window.refreshCategorySelect();
+      if (typeof window.applyFilters === 'function') window.applyFilters();
+    }
+    function startSnapshots(user) {
+      stopSnapshots();
+      remoteReady = false;
+      remoteCards = new Map();
+      const sharedQuery = query(cardsRef, where('visibility', '==', 'shared'));
+      const ownQuery = query(cardsRef, where('ownerUid', '==', user.uid));
+      let sharedLoaded = false, ownLoaded = false, migrationStarted = false;
+      let legacyCards = [];
+      try { legacyCards = JSON.parse(localStorage.getItem('postit_custom_cards')) || []; } catch { legacyCards = []; }
+      const updateReady = async () => {
+        if (sharedLoaded && ownLoaded) {
+          if (!migrationStarted) {
+            migrationStarted = true;
+            // Firestore가 비어 있을 때만 이 브라우저의 기존 사용자 제작 카드를 개인 카드로 옮깁니다.
+            if (remoteCards.size === 0 && legacyCards.length > 0) {
+            try {
+              for (const card of legacyCards) {
+                const migrated = { ...card, ownerUid: user.uid, visibility: 'private', updatedAt: Date.now() };
+                await setDoc(doc(db, 'postits', card.id), migrated, { merge: true });
+              }
+              setStatus('기존 포스트잇을 개인 포스트잇으로 옮기는 중입니다.');
+              return;
+            } catch (error) {
+              console.error(error);
+              setStatus('기존 포스트잇 이전에 실패했습니다. 백업 파일을 보관하고 보안 규칙을 확인해주세요.', true);
+            }
+            }
+          }
+          remoteReady = true;
+          drawRemoteCards();
+          setStatus('로그인 및 동기화 완료 · 공용과 내 개인 포스트잇을 표시 중입니다.');
+        }
+      };
+      snapshotStops.push(onSnapshot(sharedQuery, snap => {
+        sharedLoaded = true;
+        for (const [id, card] of remoteCards) if (card.visibility === 'shared') remoteCards.delete(id);
+        snap.forEach(d => remoteCards.set(d.id, { ...d.data(), id: d.id }));
+        updateReady();
+      }, error => { setStatus('공용 포스트잇을 불러오지 못했습니다. 보안 규칙을 확인해주세요.', true); console.error(error); }));
+      snapshotStops.push(onSnapshot(ownQuery, snap => {
+        ownLoaded = true;
+        for (const [id, card] of remoteCards) if (card.ownerUid === user.uid && card.visibility !== 'shared') remoteCards.delete(id);
+        snap.forEach(d => {
+          const card = { ...d.data(), id: d.id };
+          if (card.visibility === 'private') remoteCards.set(d.id, card);
+        });
+        updateReady();
+      }, error => { setStatus('내 포스트잇을 불러오지 못했습니다. 보안 규칙을 확인해주세요.', true); console.error(error); }));
+    }
+
+    // 기존 저장 함수와 연결해 카드 추가·수정·삭제를 Firestore에 반영합니다.
+    window.saveList = function (key, value) {
+      const oldValue = (() => { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } })();
+      const saved = originalSaveList(key, value);
+      if (!saved || key !== 'postit_custom_cards' || applyingRemote || !currentUser || !remoteReady) return saved;
+      const oldMap = new Map(oldValue.map(c => [c.id, c]));
+      const newMap = new Map(value.map(c => [c.id, c]));
+      writeQueue = writeQueue.then(async () => {
+        for (const [id, card] of newMap) {
+          const old = oldMap.get(id);
+          if (old && JSON.stringify(old) === JSON.stringify(card)) continue;
+          const ownerUid = card.ownerUid || old?.ownerUid || currentUser.uid;
+          const visibility = card.visibility || old?.visibility || 'private';
+          const normalized = { ...card, id, ownerUid, visibility, updatedAt: Date.now() };
+          await setDoc(doc(db, 'postits', id), normalized, { merge: true });
+        }
+        for (const [id, old] of oldMap) {
+          if (!newMap.has(id)) {
+            if (old.visibility === 'shared' || old.ownerUid === currentUser.uid) {
+              await deleteDoc(doc(db, 'postits', id));
+            }
+          }
+        }
+      }).catch(error => {
+        console.error(error);
+        setStatus('저장 동기화에 실패했습니다. 로그인 상태와 Firestore 규칙을 확인해주세요.', true);
+      });
+      return saved;
+    };
+
+    onAuthStateChanged(auth, user => {
+      currentUser = user;
+      window.fbCurrentUser = user;
+      stopSnapshots();
+      remoteReady = false;
+      remoteCards = new Map();
+      if (!user) {
+        userLabel.textContent = '';
+        authControls.classList.remove('hidden');
+        signedInControls.classList.add('hidden');
+        setStatus('로그인하면 공용·개인 포스트잇이 동기화됩니다.');
+        return;
+      }
+      userLabel.textContent = user.email || '로그인 사용자';
+      authControls.classList.add('hidden');
+      signedInControls.classList.remove('hidden');
+      setStatus('포스트잇을 불러오는 중입니다.');
+      startSnapshots(user);
+    });
   </script>
 </body>
 </html>
