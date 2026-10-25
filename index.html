@@ -480,7 +480,7 @@
       document.getElementById('newBody').value = card ? (card.body || '') : '';
       document.getElementById('newMemo').value = card ? (card.memo || '') : '';
       document.getElementById('newWarn').value = card ? (card.warn || '') : '';
-      refreshCategorySelect(card ? card.category : builtinName('세포생물학'));
+      refreshCategorySelect(card ? card.category : (allCats()[0] || '__new__'));
       setColorSelection(card ? card.color : 'yellow');
       const rich = !!(card && card.html);
       document.getElementById('textFields').classList.toggle('hidden', rich);
@@ -617,7 +617,7 @@
        localStorage 값은 Firestore 스냅샷이 도착할 때마다 갱신되는 캐시입니다. */
     const LS_CATS = 'postit_custom_categories';
     const LS_BNAMES = 'postit_builtin_cat_names';
-    const ORIG_CATS = Object.keys(BADGE);
+    const ORIG_CATS = []; /* 기본 분야 없음: 모든 분야를 직접 만들고 삭제할 수 있습니다 */
     function loadMap(k) {
       try { const v = JSON.parse(localStorage.getItem(k)); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
       catch (e) { return {}; }
@@ -626,8 +626,7 @@
     function builtinNames() { return ORIG_CATS.map(builtinName); }
     function origOf(name) { return ORIG_CATS.find(o => builtinName(o) === name); }
     function badgeClass(cat) {
-      const o = origOf(cat);
-      if (o) return BADGE[o];
+      if (BADGE[cat]) return BADGE[cat];
       let h = 0;
       for (const ch of String(cat)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
       return 'badge-x' + (h % 6);
@@ -654,7 +653,7 @@
       });
       const o = document.createElement('option');
       o.value = '__new__'; o.textContent = '＋ 새 분야 만들기…'; sel.appendChild(o);
-      sel.value = (cats.includes(keep) || keep === '__new__') ? keep : builtinName('세포생물학');
+      sel.value = (cats.includes(keep) || keep === '__new__') ? keep : (cats[0] || '__new__');
       onCatChange();
     }
 
