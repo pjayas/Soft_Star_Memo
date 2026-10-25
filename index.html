@@ -383,10 +383,10 @@
     const LS_CARDS = 'postit_custom_cards';
     const LS_HIDDEN = 'postit_hidden_builtin';
 
-    const BADGE = {
+    const BADGE = Object.freeze({
       '세포생물학': 'badge-cell', '생화학': 'badge-bio', '유전학': 'badge-gen',
       '분자생물학': 'badge-mol', '인체생리학': 'badge-phys', '식생분진': 'badge-eco'
-    };
+    });
 
     const TILTS = ['tilt-left-1','tilt-right-1','tilt-left-2','tilt-right-2','tilt-zero'];
     const ARROW = '<svg class="toggle-icon text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
@@ -617,12 +617,12 @@
        localStorage 값은 Firestore 스냅샷이 도착할 때마다 갱신되는 캐시입니다. */
     const LS_CATS = 'postit_custom_categories';
     const LS_BNAMES = 'postit_builtin_cat_names';
-    const ORIG_CATS = []; /* 기본 분야 없음: 모든 분야를 직접 만들고 삭제할 수 있습니다 */
+    const ORIG_CATS = Object.keys(BADGE); /* 기본 6개 분야: 이름 변경·삭제 불가 */
     function loadMap(k) {
       try { const v = JSON.parse(localStorage.getItem(k)); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
       catch (e) { return {}; }
     }
-    function builtinName(orig) { return loadMap(LS_BNAMES)[orig] || orig; }
+    function builtinName(orig) { return orig; } /* 기본 분야 이름은 고정 */
     function builtinNames() { return ORIG_CATS.map(builtinName); }
     function origOf(name) { return ORIG_CATS.find(o => builtinName(o) === name); }
     function badgeClass(cat) {
@@ -631,7 +631,8 @@
       for (const ch of String(cat)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
       return 'badge-x' + (h % 6);
     }
-    function allCats() { return builtinNames().concat(loadList(LS_CATS)); }
+    function customCats() { return loadList(LS_CATS).filter(n => !ORIG_CATS.includes(n)); }
+    function allCats() { return builtinNames().concat(customCats()); }
 
     function registerCat(name) {
       if (!name || builtinNames().includes(name) || name === '전체보기') return;
@@ -671,16 +672,16 @@
         const wrap = document.createElement('span');
         wrap.className = 'inline-flex';
         const b = document.createElement('button');
-        b.className = 'filter-btn px-3 py-1.5 text-xs font-medium rounded-l-lg border border-slate-300 transition hover:bg-slate-100';
+        b.className = 'filter-btn px-3 py-1.5 text-xs font-medium ' + (deletable ? 'rounded-l-lg' : 'rounded-lg') + ' border border-slate-300 transition hover:bg-slate-100';
         b.dataset.cat = name; b.textContent = name;
         b.onclick = () => filterCategory(name);
-        const e = document.createElement('button');
-        e.className = 'px-1.5 py-1.5 text-xs border border-l-0 border-slate-300 text-slate-400 hover:bg-sky-100 hover:text-sky-700'
-          + (deletable ? '' : ' rounded-r-lg');
-        e.title = '분야 이름 수정'; e.textContent = '✎';
-        e.onclick = () => renameCategory(name);
-        wrap.append(b, e);
+        wrap.append(b);
         if (deletable) {
+          const e = document.createElement('button');
+          e.className = 'px-1.5 py-1.5 text-xs border border-l-0 border-slate-300 text-slate-400 hover:bg-sky-100 hover:text-sky-700';
+          e.title = '분야 이름 수정'; e.textContent = '✎';
+          e.onclick = () => renameCategory(name);
+          wrap.append(e);
           const x = document.createElement('button');
           x.className = 'px-1.5 py-1.5 text-xs rounded-r-lg border border-l-0 border-slate-300 text-slate-400 hover:bg-red-100 hover:text-red-600';
           x.title = '분야 삭제'; x.textContent = '×';
@@ -690,7 +691,7 @@
         box.appendChild(wrap);
       };
       builtinNames().forEach(n => addBtn(n, false));
-      loadList(LS_CATS).forEach(n => addBtn(n, true));
+      customCats().forEach(n => addBtn(n, true));
       /* HTML에 직접 넣은 기본 카드의 분야 표시 갱신 */
       document.querySelectorAll('#cardsGrid > article[data-orig-category]').forEach(el => {
         const bn = builtinName(el.dataset.origCategory);
@@ -703,6 +704,7 @@
     }
 
     function renameCategory(oldName) {
+      if (ORIG_CATS.includes(oldName)) { alert('기본 분야는 이름을 변경할 수 없습니다.'); return; }
       if (!requireReady()) return;
       const orig = origOf(oldName);
       const input = prompt(`"${oldName}" 분야의 새 이름을 입력하세요 (12자 이내)`, oldName);
@@ -722,6 +724,7 @@
     }
 
     function deleteCategory(name) {
+      if (ORIG_CATS.includes(name)) { alert('기본 분야는 삭제할 수 없습니다.'); return; }
       if (!requireReady()) return;
       if (loadList(LS_CARDS).some(c => c.category === name)) {
         alert(`"${name}" 분야를 사용하는 카드가 있어 삭제할 수 없습니다.\n카드를 삭제하거나 다른 분야로 수정한 뒤 다시 시도해주세요.`);
