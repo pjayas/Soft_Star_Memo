@@ -815,7 +815,7 @@
     </div>
 
     <footer class="mt-12 text-center text-xs text-slate-500 pb-8">
-      생물학 심화 스터디 보드 • 공용·개인 포스트잇 • Firebase 자동 동기화
+      생물학 심화 스터디 보드 • 함께 쓰는 포스트잇 • Firebase 자동 동기화
     </footer>
   </div>
 
@@ -824,13 +824,8 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto">
       <h2 id="modalTitle" class="text-lg font-extrabold text-slate-800 mb-3">새 포스트잇 만들기</h2>
 
-      <div class="mb-3">
-        <label class="block text-xs font-bold text-slate-600 mb-1">공개 범위</label>
-        <select id="newVisibility" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
-          <option value="shared">공용 - 로그인한 세 사람이 함께 사용</option>
-          <option value="private">개인 - 나만 볼 수 있음</option>
-        </select>
-        <p class="mt-1 text-xs text-slate-500">공용 포스트잇은 로그인한 사용자가 수정·삭제할 수 있습니다.</p>
+      <div class="mb-3 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-800">
+        이 포스트잇은 로그인한 세 사람이 함께 보고 수정할 수 있습니다.
       </div>
       <label class="block text-xs font-bold text-slate-600 mb-1">제목 *</label>
       <input id="newTitle" maxlength="60" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400" placeholder="예: 해당과정 vs TCA 회로">
@@ -1008,8 +1003,6 @@
       document.getElementById('newBody').value = card ? card.body : '';
       document.getElementById('newMemo').value = card ? card.memo : '';
       document.getElementById('newWarn').value = card ? card.warn : '';
-      document.getElementById('newVisibility').value = card && card.visibility ? card.visibility : 'shared';
-      document.getElementById('newVisibility').disabled = !!(card && card.ownerUid && window.fbCurrentUser && card.ownerUid !== window.fbCurrentUser.uid);
       refreshCategorySelect(card ? card.category : builtinName('분자생물학'));
       setColorSelection(card ? card.color : 'yellow');
       const rich = !!(card && card.html);
@@ -1055,7 +1048,7 @@
         toast('수정되었습니다');
       } else {
         if (!window.fbCurrentUser) { alert('먼저 로그인해주세요.'); return; }
-        const card = Object.assign({ id: 'c' + Date.now(), tilt: TILTS[Math.floor(Math.random() * TILTS.length)], ownerUid: window.fbCurrentUser.uid, visibility: document.getElementById('newVisibility').value }, data);
+        const card = Object.assign({ id: 'c' + Date.now(), tilt: TILTS[Math.floor(Math.random() * TILTS.length)], ownerUid: window.fbCurrentUser.uid, visibility: 'shared' }, data);
         list.push(card);
         if (!saveList(LS_CARDS, list)) return;
         grid.prepend(buildCard(card));
@@ -1511,45 +1504,57 @@
       let sharedLoaded = false, ownLoaded = false, migrationStarted = false;
       let legacyCards = [];
       try { legacyCards = JSON.parse(localStorage.getItem('postit_custom_cards')) || []; } catch { legacyCards = []; }
+
       const updateReady = async () => {
-        if (sharedLoaded && ownLoaded) {
-          if (!migrationStarted) {
-            migrationStarted = true;
-            // Firestore가 비어 있을 때만 이 브라우저의 기존 사용자 제작 카드를 개인 카드로 옮깁니다.
-            if (remoteCards.size === 0 && legacyCards.length > 0) {
-            try {
-              for (const card of legacyCards) {
-                const migrated = { ...card, ownerUid: user.uid, visibility: 'private', updatedAt: Date.now() };
-                await setDoc(doc(db, 'postits', card.id), migrated, { merge: true });
+        if (!sharedLoaded || !ownLoaded) return;
+        if (!migrationStarted) {
+          migrationStarted = true;
+          try {
+            // 기존 브라우저에만 있던 카드도 모두 공용 카드로 옮깁니다.
+            for (const card of legacyCards) {
+              if (!card || !card.id) continue;
+              const existing = remoteCards.get(card.id);
+              const migrated = { ...(existing || {}), ...card, id: card.id,
+                ownerUid: (existing && existing.ownerUid) || user.uid,
+                visibility: 'shared', updatedAt: Date.now() };
+              await setDoc(doc(db, 'postits', card.id), migrated, { merge: true });
+            }
+            // 예전에 개인 카드로 저장된 이 계정 소유 카드도 공용으로 전환합니다.
+            for (const [id, card] of remoteCards) {
+              if (card.ownerUid === user.uid && card.visibility !== 'shared') {
+                await setDoc(doc(db, 'postits', id), { ...card, visibility: 'shared', updatedAt: Date.now() }, { merge: true });
               }
-              setStatus('기존 포스트잇을 개인 포스트잇으로 옮기는 중입니다.');
-              return;
-            } catch (error) {
-              console.error(error);
-              setStatus('기존 포스트잇 이전에 실패했습니다. 백업 파일을 보관하고 보안 규칙을 확인해주세요.', true);
             }
-            }
+          } catch (error) {
+            console.error(error);
+            setStatus('기존 포스트잇을 공용으로 옮기지 못했습니다. Firestore 규칙을 확인해주세요.', true);
           }
-          remoteReady = true;
-          drawRemoteCards();
-          setStatus('로그인 및 동기화 완료 · 공용과 내 개인 포스트잇을 표시 중입니다.');
         }
+        remoteReady = true;
+        drawRemoteCards();
+        setStatus('로그인 및 동기화 완료 · 모든 로그인 사용자가 같은 포스트잇을 함께 사용합니다.');
       };
+
       snapshotStops.push(onSnapshot(sharedQuery, snap => {
         sharedLoaded = true;
-        for (const [id, card] of remoteCards) if (card.visibility === 'shared') remoteCards.delete(id);
-        snap.forEach(d => remoteCards.set(d.id, { ...d.data(), id: d.id }));
+        remoteCards.clear();
+        snap.forEach(d => remoteCards.set(d.id, { ...d.data(), id: d.id, visibility: 'shared' }));
         updateReady();
-      }, error => { setStatus('공용 포스트잇을 불러오지 못했습니다. 보안 규칙을 확인해주세요.', true); console.error(error); }));
+      }, error => { setStatus('공용 포스트잇을 불러오지 못했습니다. Firestore 규칙을 확인해주세요.', true); console.error(error); }));
+
       snapshotStops.push(onSnapshot(ownQuery, snap => {
         ownLoaded = true;
-        for (const [id, card] of remoteCards) if (card.ownerUid === user.uid && card.visibility !== 'shared') remoteCards.delete(id);
         snap.forEach(d => {
           const card = { ...d.data(), id: d.id };
-          if (card.visibility === 'private') remoteCards.set(d.id, card);
+          if (card.visibility !== 'shared') {
+            // 기존 개인 카드를 해당 소유자가 로그인하면 공용 카드로 전환합니다.
+            setDoc(doc(db, 'postits', d.id), { ...card, visibility: 'shared', updatedAt: Date.now() }, { merge: true })
+              .catch(error => { console.error(error); setStatus('기존 포스트잇을 공용으로 전환하지 못했습니다.', true); });
+          }
+          remoteCards.set(d.id, { ...card, visibility: 'shared' });
         });
         updateReady();
-      }, error => { setStatus('내 포스트잇을 불러오지 못했습니다. 보안 규칙을 확인해주세요.', true); console.error(error); }));
+      }, error => { setStatus('내 기존 포스트잇을 확인하지 못했습니다. Firestore 규칙을 확인해주세요.', true); console.error(error); }));
     }
 
     // 기존 저장 함수와 연결해 카드 추가·수정·삭제를 Firestore에 반영합니다.
@@ -1564,15 +1569,13 @@
           const old = oldMap.get(id);
           if (old && JSON.stringify(old) === JSON.stringify(card)) continue;
           const ownerUid = card.ownerUid || old?.ownerUid || currentUser.uid;
-          const visibility = card.visibility || old?.visibility || 'private';
-          const normalized = { ...card, id, ownerUid, visibility, updatedAt: Date.now() };
+          const normalized = { ...card, id, ownerUid, visibility: 'shared', updatedAt: Date.now() };
           await setDoc(doc(db, 'postits', id), normalized, { merge: true });
         }
         for (const [id, old] of oldMap) {
           if (!newMap.has(id)) {
-            if (old.visibility === 'shared' || old.ownerUid === currentUser.uid) {
-              await deleteDoc(doc(db, 'postits', id));
-            }
+            // 모든 포스트잇은 공용이므로 로그인한 사용자가 삭제할 수 있습니다.
+            await deleteDoc(doc(db, 'postits', id));
           }
         }
       }).catch(error => {
@@ -1592,7 +1595,7 @@
         userLabel.textContent = '';
         authControls.classList.remove('hidden');
         signedInControls.classList.add('hidden');
-        setStatus('로그인하면 공용·개인 포스트잇이 동기화됩니다.');
+        setStatus('로그인하면 세 사람이 함께 쓰는 포스트잇이 동기화됩니다.');
         return;
       }
       userLabel.textContent = user.email || '로그인 사용자';
