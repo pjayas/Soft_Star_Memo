@@ -131,7 +131,7 @@
     .badge-x4 { background-color: #ffe4e6; color: #9f1239; }
     .badge-x5 { background-color: #e2e8f0; color: #334155; }
 
-    /* ===== 표·그림이 들어간 카드(백업에서 불러온 카드) ===== */
+    /* ===== 표·그림이 들어간 카드 ===== */
     .rich-content { overflow-x: auto; }
     .rich-content h3 { font-size: 1em; font-weight: 700; margin: 16px 0 6px; }
     .rich-content p { margin: 6px 0; }
@@ -321,490 +321,8 @@
       </div>
     </header>
 
-    <!-- Cards Grid -->
+    <!-- Cards Grid (기존 메모 내용 비움) -->
     <main class="sticky-grid" id="cardsGrid">
-
-      <!-- 1 -->
-      <article class="sticky-note note-yellow tilt-left-1" data-category="분자생물학" data-keywords="리보솜 항생제 테트라사이클린 스트렙토마이신 클로람페니콜">
-        <div class="note-pin"></div>
-        <details open>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">① 리보솜 단위체와 항생제</h3></div></summary>
-          <div class="card-content">
-            <p class="font-semibold text-amber-900 mb-1">세균(70S) vs 진핵생물(80S) 소단위체 구분</p>
-            <ul class="list-disc pl-4 space-y-1 mb-2 text-slate-700">
-              <li><strong>세균 (70S):</strong> 30S (16S rRNA) + 50S (23S, 5S rRNA)</li>
-              <li><strong>진핵 (80S):</strong> 40S (18S rRNA) + 60S (28S, 5.8S, 5S rRNA)</li>
-            </ul>
-            <div class="memory">💡 암기: [30S 저해] 테트라사이클린(A자리 t-RNA 결합 방해), 스트렙토마이신(개시 저해)</div>
-            <div class="memory">💡 암기: [50S 저해] 클로람페니콜 & 에리스로마이신 (펩티드결합 형성/전이 억제)</div>
-            <div class="warning">⚠️ 주의: 마이코플라즈마는 세포벽이 없으므로 페니실린계(세포벽 합성 저해) 효능 없음!</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 2 -->
-      <article class="sticky-note note-blue tilt-right-1" data-category="대사·신경" data-keywords="미토콘드리아 전자전달계 로테논 아미탈 안티마이신 일산화탄소 올리고마이신 2,4-DNP DNP">
-        <div class="note-pin"></div>
-        <details open>
-          <summary><div><span class="badge badge-met">대사·신경</span><h3 class="text-base font-bold text-slate-900">② 전자전달계 저해제 vs 짝풀림제</h3></div></summary>
-          <div class="card-content">
-            <div class="flow">
-              복합체 I 억제: 로테논(Rotenone), 아미탈(Amytal)<br>
-              복합체 III 억제: 안티마이신 A (Antimycin A)<br>
-              복합체 IV 억제: CN⁻, CO, NaN₃ (시안화물, 일산화탄소)<br>
-              ATP 합성효소 억제: 올리고마이신 (Oligomycin)
-            </div>
-            <div class="warning">⚡ <strong>짝풀림제 (Uncoupler: DNP, Thermogenin):</strong> H⁺ 구배를 소모하여 ATP 합성은 억제하지만 전자전달과 산소 소비는 오히려 가속되며 열 발생!</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 3 -->
-      <article class="sticky-note note-green tilt-left-2" data-category="대사·신경" data-keywords="인슐린 이자 베타세포 GLUT2 ATP K채널 Ca채널 분비">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-met">대사·신경</span><h3 class="text-base font-bold text-slate-900">③ 이자 β세포 인슐린 분비 기작</h3></div></summary>
-          <div class="card-content">
-            <div class="flow">
-              1. 포도당 혈중 농도 증가 → GLUT2를 통해 β세포 유입<br>
-              2. 세포호흡 진행 → 세포 내 [ATP]/[ADP] 비율 상승<br>
-              3. ATP-의존성 K⁺ 채널 닫힘 → K⁺ 유출 차단<br>
-              4. 탈분극(Depolarization) 발생<br>
-              5. 전압의존성 Ca²⁺ 채널 열림 → Ca²⁺ 세포 내 유입<br>
-              6. 인슐린 소낭의 탈포작용(Exocytosis) 유도
-            </div>
-            <div class="memory">💡 설포닐우레아(당뇨병 치료제) = ATP-의존성 K⁺ 채널 강제 폐쇄제</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 4 -->
-      <article class="sticky-note note-purple tilt-right-2" data-category="분자생물학" data-keywords="splicing mRNA 스플라이시오솜 올리고 snRNP 라리앗 snRNA">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">④ pre-mRNA Splicing 기작</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 mb-2 text-slate-700">
-              <li><strong>경계 서열:</strong> 5' 스플라이스 부위 (GU) --- 분기점 A --- 3' 스플라이스 부위 (AG)</li>
-              <li><strong>1차 에스테르 교환:</strong> 분기점 A의 2'-OH가 5' GU의 인산기 공격 → 올가미(Lariat) 구조 형성</li>
-              <li><strong>2차 에스테르 교환:</strong> 절단된 5' 엑손의 3'-OH가 3' AG를 공격 → 엑손 연결 & 인트론 라리앗 방출</li>
-            </ul>
-            <div class="memory">💡 snRNP (U1, U2, U4, U5, U6)가 스플라이시오솜 복합체 형성</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 5 -->
-      <article class="sticky-note note-orange tilt-left-1" data-category="분자생물학" data-keywords="단백질 크로마토그래피 SDS-PAGE 크기배제 이온교환 친화성 SDS">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">⑤ 단백질 정제 & SDS-PAGE</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>크기 배제 크로마토그래피 (GPC):</strong> 큰 단백질이 구슬 구멍에 못 들어가서 먼저 용출!</li>
-              <li><strong>이온 교환 크로마토그래피:</strong> 음이온교환체(DEAE, 양전하), 양이온교환체(CM, 음전하)</li>
-              <li><strong>친화성 크로마토그래피:</strong> His-tag + Ni-NTA 기둥 (Imidazole로 용출)</li>
-              <li><strong>SDS-PAGE:</strong> SDS가 균일한 음전하 부여. 분자량이 작은 단백질이 더 빠르게 이동!</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 6 -->
-      <article class="sticky-note note-purple tilt-right-1" data-category="면역학" data-keywords="수지상세포 항원제시 교차제시 MHC I MHC II DC">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-imm">면역학</span><h3 class="text-base font-bold text-slate-900">⑥ 수지상세포(DC) & 교차제시</h3></div></summary>
-          <div class="card-content">
-            <p class="font-semibold text-purple-900 mb-1">DC는 전문 항원제시세포(APC)의 핵심</p>
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>내인성 항원:</strong> 프로테아솜 분해 → TAP → MHC I → CD8⁺ T세포 (세포독성)</li>
-              <li><strong>외인성 항원:</strong> 엔도시토시스 → 리소좀 합체 → MHC II → CD4⁺ T세포 (보조)</li>
-              <li><strong>교차제시 (Cross-presentation):</strong> 외인성 항원을 섭취하여 MHC I을 통해 CD8⁺ T세포에 제시 가능 (바이러스/암 항원 공격 활성화에 필수!)</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 7 -->
-      <article class="sticky-note note-yellow tilt-zero" data-category="면역학" data-keywords="과민반응 알레르기 IgE IgG 면역복합체 지연형T세포 1형 2형 3형 4형">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-imm">면역학</span><h3 class="text-base font-bold text-slate-900">⑦ 과민반응 (Hypersensitivity) I~IV형</h3></div></summary>
-          <div class="card-content">
-            <div class="space-y-1.5">
-              <p><strong>I형 (즉시형):</strong> IgE + 비만세포/호염구 (히스타민 분비, 아나필락시스)</p>
-              <p><strong>II형 (세포독성형):</strong> IgG/IgM + 세포 표면 항원 (수혈부작용, 태아적아구증)</p>
-              <p><strong>III형 (면역복합체형):</strong> IgG + 가용성 항원 복합체 침착 (SLE 루프스, 사구체신염)</p>
-              <p><strong>IV형 (지연형/세포매개성):</strong> T세포 매개 (옻 접촉피부염, 투베르쿨린 반응, Contact Dermatitis)</p>
-            </div>
-            <div class="memory">💡 ACID 암기: I(Anaphylactic), II(Cytotoxic), III(Immune complex), IV(Delayed)</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 8 -->
-      <article class="sticky-note note-blue tilt-left-2" data-category="분자생물학" data-keywords="DNA 유전물질 그리피스 에이버리 허시 체이스 형질전환 32P 35S">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">⑧ DNA 유전물질 증명 3대 실험</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>그리피스 (1928):</strong> 열처리 S형균 + 생 R형균 → R형균이 S형으로 형질전환.</li>
-              <li><strong>에이버리 등 (1944):</strong> DNase 처리 시에만 형질전환 억제 → 유전물질은 DNA임 확인.</li>
-              <li><strong>허시-체이스 (1952):</strong> T2 박테리오파지. ³⁵S(단백질 상층액) vs ³²P(DNA 침전물 박테리아 내부 유입).</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 9 -->
-      <article class="sticky-note note-green tilt-right-2" data-category="대사·신경" data-keywords="에피네프린 α1 α2 β1 β2 수용체 교감신경 글리코젠">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-met">대사·신경</span><h3 class="text-base font-bold text-slate-900">⑨ 에피네프린 수용체 종류 및 작용</h3></div></summary>
-          <div class="card-content">
-            <div class="space-y-2">
-              <div><strong>α1 수용체 (Gq):</strong> PLC 활성화 → IP₃/DAG → Ca²⁺↑ → 피부/장기 혈관 수축</div>
-              <div><strong>β1 수용체 (Gs):</strong> 심장 표면 → AC 활성화 → cAMP↑ → 심장 박동수/수축력 증가</div>
-              <div><strong>β2 수용체 (Gs):</strong> 골격근 혈관, 기관지 평활근 → 평활근 이완 (혈류 증가, 기관지 확장)</div>
-            </div>
-            <div class="warning">⚠️ 동일 호르몬이라도 조직의 수용체 종류와 신호전달 경로에 따라 반대 효과 유발!</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 10 -->
-      <article class="sticky-note note-orange tilt-right-1" data-category="대사·신경" data-keywords="아미노산 필수아미노산 BCAA 발린 로이신 이소로이신">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-met">대사·신경</span><h3 class="text-base font-bold text-slate-900">⑩ 필수아미노산 10종 & BCAA</h3></div></summary>
-          <div class="card-content">
-            <div class="memory">💡 필수아미노산 암기법: [Val, Leu, Ile, Thr, Met, Phe, Trp, Lys, His, Arg]</div>
-            <ul class="list-disc pl-4 space-y-1 mt-2 text-slate-700">
-              <li><strong>BCAA (분지쇄 아미노산):</strong> Valine, Leucine, Isoleucine (간을 거치지 않고 골격근에서 직접 대사되어 에너지원으로 사용)</li>
-              <li><strong>방향족 아미노산:</strong> Phe, Tyr, Trp (280nm 흡광도 가짐)</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 11 -->
-      <article class="sticky-note note-purple tilt-left-1" data-category="분자생물학" data-keywords="글리신 글라이신 프롤린 알파나선 2차구조 광학이성질체">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">⑪ Glycine & Proline 구조적 특성</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>Glycine (G):</strong> R기가 -H. 가장 작음. 광학 이성질체(카이랄성) 없음! 유연성이 너무 높아 α-나선 파괴체로 작용.</li>
-              <li><strong>Proline (P):</strong> R기가 곁사슬 고리 형성 (2차 아민). 고리가 경직되어 α-나선 구조 꺾임 발생 (Helix breaker).</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 12 -->
-      <article class="sticky-note note-yellow tilt-right-2" data-category="대사·신경" data-keywords="LTP 장기증강 해마 AMPA NMDA 글루타메이트 칼슘 CaMKII">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-met">대사·신경</span><h3 class="text-base font-bold text-slate-900">⑫ 해마 장기증강(LTP) 신호전달</h3></div></summary>
-          <div class="card-content">
-            <div class="flow">
-              1. 글루타메이트 분비 → AMPA 수용체 결합 → Na⁺ 유입 탈분극<br>
-              2. 강력한 탈분극으로 NMDA 수용체의 Mg²⁺ 차단 해제<br>
-              3. NMDA를 통해 Ca²⁺ 대량 유입<br>
-              4. Ca²⁺/Calmodulin, CaMKII 활성화<br>
-              5. 시냅스 후 막으로 AMPA 수용체 추가 세포막 삽입 & NO 분비로 역방향 신호전달
-            </div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 13 -->
-      <article class="sticky-note note-blue tilt-left-1" data-category="발생·생리학" data-keywords="p53 p21 Bax 아포토시스 세포자멸사 DNA손상 암억제유전자">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-dev">발생·생리학</span><h3 class="text-base font-bold text-slate-900">⑬ p53 종양억제유전자 작동 기작</h3></div></summary>
-          <div class="card-content">
-            <p class="font-semibold text-blue-900 mb-1">DNA 손상 감지 시 게놈의 수호자 p53 활성화</p>
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>세포주기 정지:</strong> p21 단백질 발현 유도 → Cdk2/Cyclin E 억제 → G1/S 정지 및 DNA 수선 시간 확보.</li>
-              <li><strong>세포자멸사(Apoptosis):</strong> 복구 불가능 시 Bax 발현 유도 → 미토콘드리아 Cytochrome c 방출 → Caspase 9/3 활성화.</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 14 -->
-      <article class="sticky-note note-green tilt-zero" data-category="발생·생리학" data-keywords="식물호르몬 옥신 지베렐린 에틸렌 시토키닌 ABA 유비퀴틴 억제제">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-dev">발생·생리학</span><h3 class="text-base font-bold text-slate-900">⑭ 식물호르몬(옥신·지베렐린) 신호전달</h3></div></summary>
-          <div class="card-content">
-            <p class="mb-1"><strong>공통 기작:</strong> 호르몬이 수용체와 결합하여 억제자 단백질을 프로테아솜으로 분해시킴!</p>
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>옥신 (Auxin):</strong> TIR1 수용체 + Aux/IAA(억제자) 유비퀴틴화 분해 → ARF 전사인자 활성화.</li>
-              <li><strong>지베렐린 (GA):</strong> GID1 수용체 + DELLA(억제자) 분해 → α-아밀라아제 합성 유도.</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 15 -->
-      <article class="sticky-note note-purple tilt-right-2" data-category="발생·생리학" data-keywords="질소순환 질소고정 뿌리혹 리조비움 레그헤모글로빈">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-dev">발생·생리학</span><h3 class="text-base font-bold text-slate-900">⑮ 질소고정 & 뿌리혹 공생</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>질소고정효소 (Nitrogenase):</strong> N₂ + 8H⁺ + 8e⁻ + 16ATP → 2NH₃ + H₂ + 16ADP</li>
-              <li><strong>산소 딜레마:</strong> Nitrogenase는 O₂에 매우 취약함!</li>
-              <li><strong>해결책:</strong> 콩과식물이 <em>레그헤모글로빈(Leghemoglobin)</em>을 생산하여 O₂ 농도를 미세하게 단속 제어.</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 16 -->
-      <article class="sticky-note note-orange tilt-left-2" data-category="대사·신경" data-keywords="라인위버버크 효소저해 경쟁적 비경쟁적 불경쟁적 Km Vmax 그래프">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-met">대사·신경</span><h3 class="text-base font-bold text-slate-900">⑯ 라인위버-버크 효소 저해 유형</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1.5 text-slate-700">
-              <li><strong>경쟁적 저해 (Competitive):</strong> Y절편 불변(Vmax 동일), X절편 이동(Km 증가). 기질 대량 투입 시 극복 가능.</li>
-              <li><strong>비경쟁적 저해 (Non-competitive):</strong> X절편 불변(Km 동일), Y절편 상승(Vmax 감소).</li>
-              <li><strong>불경쟁적 저해 (Uncompetitive):</strong> ES 복합체에만 결합. 기울기 동일, Km 감소 & Vmax 감소.</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 17 -->
-      <article class="sticky-note note-yellow tilt-right-1" data-category="분자생물학" data-keywords="miRNA siRNA Drosha Dicer RISC RNAi">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">⑰ miRNA vs siRNA 비교</h3></div></summary>
-          <div class="card-content">
-            <table class="w-full text-xs text-left border-collapse border border-amber-300 bg-white/70">
-              <thead>
-                <tr class="bg-amber-200/60">
-                  <th class="p-1 border border-amber-300">구분</th>
-                  <th class="p-1 border border-amber-300">miRNA</th>
-                  <th class="p-1 border border-amber-300">siRNA</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="p-1 font-bold border border-amber-300">기원</td>
-                  <td class="p-1 border border-amber-300">내인성 게놈 (Pri-miRNA)</td>
-                  <td class="p-1 border border-amber-300">외인성 (바이러스, 실험실)</td>
-                </tr>
-                <tr>
-                  <td class="p-1 font-bold border border-amber-300">상보성</td>
-                  <td class="p-1 border border-amber-300">불완전 상보 (표적 다수)</td>
-                  <td class="p-1 border border-amber-300">100% 완전 상보</td>
-                </tr>
-                <tr>
-                  <td class="p-1 font-bold border border-amber-300">결과</td>
-                  <td class="p-1 border border-amber-300">번역 억제 / mRNA 분해</td>
-                  <td class="p-1 border border-amber-300">mRNA 절단 (Slicer)</td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="mt-2 text-xs">※ 가공과정: 핵 내 Drosha → 수출 → 세포질 Dicer → RISC 형성</p>
-          </div>
-        </details>
-      </article>
-
-      <!-- 18 -->
-      <article class="sticky-note note-blue tilt-left-1" data-category="분자생물학" data-keywords="lac오페론 trp오페론 감쇠조절 attenuation 리프레서 젖당">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">⑱ lac 오페론 & trp 감쇠(Attenuation)</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>lac 오페론 최대 활성:</strong> 젖당 있음 (억제인자 불활성화) + 포도당 없음 (cAMP High → CAP 활성화)</li>
-              <li><strong>trp 감쇠 (Attenuation):</strong> Trp 풍부 시 리보솜이 리더 펩티드를 빠르게 번역 → 3-4 헤어핀(종결자) 형성되어 전사 조기 중단!</li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 19 -->
-      <article class="sticky-note note-green tilt-right-2" data-category="면역학" data-keywords="HIV 역전사효소 AZT 프로테아제 인테그라제 에이즈 바이러스">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-imm">면역학</span><h3 class="text-base font-bold text-slate-900">⑲ HIV 생활사 및 치료제 작용점</h3></div></summary>
-          <div class="card-content">
-            <div class="flow">
-              gp120/gp41 → CD4 및 CCR5 결합 → 막융합 및 유입 → 역전사(RT) → 인테그라아제(Integrase)로 숙주 DNA 삽입 → 전사 및 번역 → 프로테아제(Protease) 조립
-            </div>
-            <p class="mt-2 text-xs"><strong>주요 치료제:</strong> AZT (역전사 억제제), Raltegravir (인테그라아제 억제제), Ritonavir (단백질 분해효소 억제제)</p>
-          </div>
-        </details>
-      </article>
-
-      <!-- 20 -->
-      <article class="sticky-note note-purple tilt-left-2" data-category="분자생물학" data-keywords="전이인자 트랜스포존 Retrotransposon LINE SINE Ac Ds">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">⑳ 전이인자(Transposons) 분류</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>DNA 전이인자 (Class II):</strong> Cut-and-paste 방식 (예: 세균 IS 요소, 옥수수 Ac/Ds)</li>
-              <li><strong>레트로전이인자 (Class I):</strong> RNA 중간체 Copy-and-paste
-                <ul class="pl-4" style="list-style: circle;">
-                  <li>LTR 레트로전이인자</li>
-                  <li>Non-LTR: LINE (자율), SINE (비자율, 예: 인간 Alu element)</li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </details>
-      </article>
-
-      <!-- 21 -->
-      <article class="sticky-note note-orange tilt-zero" data-category="면역학" data-keywords="MHC I MHC II CD4 CD8 구조 다이어그램 항원제시">
-        <div class="note-pin"></div>
-        <details open>
-          <summary><div><span class="badge badge-imm">면역학</span><h3 class="text-base font-bold text-slate-900">㉑ MHC I vs MHC II 구조 및 CD4/8</h3></div></summary>
-          <div class="card-content">
-            <div class="bg-white/80 p-2 rounded-lg border border-orange-200 mb-2">
-              <svg viewBox="0 0 340 160" class="w-full h-auto">
-                <g transform="translate(10, 10)">
-                  <rect x="25" y="100" width="10" height="30" fill="#94a3b8"/>
-                  <rect x="75" y="100" width="10" height="30" fill="#94a3b8"/>
-                  <path d="M 20 20 Q 30 10 40 20 L 40 95 L 20 95 Z" fill="#f87171" stroke="#dc2626"/>
-                  <path d="M 45 20 Q 55 10 65 20 L 65 95 L 45 95 Z" fill="#f87171" stroke="#dc2626"/>
-                  <path d="M 20 60 Q 30 50 40 60 L 40 95 L 20 95 Z" fill="#ef4444" stroke="#dc2626"/>
-                  <circle cx="80" cy="75" r="14" fill="#fbbf24" stroke="#d97706"/>
-                  <ellipse cx="42" cy="22" rx="12" ry="5" fill="#10b981"/>
-                  <text x="42" y="145" font-size="10" text-anchor="middle" font-weight="bold" fill="#1e293b">MHC Class I (CD8)</text>
-                  <text x="80" y="78" font-size="8" text-anchor="middle" fill="#78350f">β2m</text>
-                </g>
-                <g transform="translate(180, 10)">
-                  <rect x="30" y="100" width="10" height="30" fill="#94a3b8"/>
-                  <rect x="65" y="100" width="10" height="30" fill="#94a3b8"/>
-                  <rect x="20" y="25" width="22" height="75" rx="5" fill="#60a5fa" stroke="#2563eb"/>
-                  <rect x="58" y="25" width="22" height="75" rx="5" fill="#818cf8" stroke="#4f46e5"/>
-                  <ellipse cx="50" cy="27" rx="16" ry="5" fill="#10b981"/>
-                  <text x="50" y="145" font-size="10" text-anchor="middle" font-weight="bold" fill="#1e293b">MHC Class II (CD4)</text>
-                  <text x="31" y="60" font-size="9" fill="#ffffff" text-anchor="middle">α</text>
-                  <text x="69" y="60" font-size="9" fill="#ffffff" text-anchor="middle">β</text>
-                </g>
-              </svg>
-            </div>
-            <div class="memory">💡 공식: 8 × 1 = 8 (MHC I + CD8), 4 × 2 = 8 (MHC II + CD4)</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 22 -->
-      <article class="sticky-note note-yellow tilt-right-1" data-category="면역학" data-keywords="면역관문 CTLA-4 PD-1 PD-L1 면역항암제 B7 CD28">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-imm">면역학</span><h3 class="text-base font-bold text-slate-900">㉒ 면역관문 억제제 (CTLA-4, PD-1)</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>CTLA-4:</strong> T세포 활성화 초기 단계(림프절)에서 CD28과 경쟁하여 B7(CD80/86)에 결합 → 억제 신호 전달.</li>
-              <li><strong>PD-1 / PD-L1:</strong> 말초 조직/암세포 표면. 암세포가 PD-L1을 과발현하여 T세포의 PD-1과 결합해 T세포 공격 무력화.</li>
-            </ul>
-            <div class="memory">💡 키트루다, 여보이 등 = PD-1/CTLA-4 차단 단클론항체 암치료제</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 23 -->
-      <article class="sticky-note note-blue tilt-left-2" data-category="발생·생리학" data-keywords="세포주기 MPF Cyclin Cdk G1 S G2 M 체크포인트">
-        <div class="note-pin"></div>
-        <details open>
-          <summary><div><span class="badge badge-dev">발생·생리학</span><h3 class="text-base font-bold text-slate-900">㉓ 세포주기 & MPF 조절</h3></div></summary>
-          <div class="card-content">
-            <div class="bg-white/80 p-2 rounded-lg border border-blue-200 mb-2">
-              <svg viewBox="0 0 200 130" class="w-full h-auto">
-                <circle cx="100" cy="65" r="45" fill="none" stroke="#cbd5e1" stroke-width="12"/>
-                <path d="M 100 20 A 45 45 0 0 1 145 65" fill="none" stroke="#3b82f6" stroke-width="12"/>
-                <path d="M 145 65 A 45 45 0 0 1 100 110" fill="none" stroke="#10b981" stroke-width="12"/>
-                <path d="M 100 110 A 45 45 0 0 1 55 65" fill="none" stroke="#f59e0b" stroke-width="12"/>
-                <path d="M 55 65 A 45 45 0 0 1 100 20" fill="none" stroke="#ef4444" stroke-width="12"/>
-                <text x="125" y="40" font-size="9" font-weight="bold" fill="#1e40af">G1</text>
-                <text x="125" y="95" font-size="9" font-weight="bold" fill="#065f46">S</text>
-                <text x="65" y="95" font-size="9" font-weight="bold" fill="#92400e">G2</text>
-                <text x="68" y="40" font-size="9" font-weight="bold" fill="#991b1b">M</text>
-                <text x="100" y="68" font-size="7" text-anchor="middle" font-weight="bold" fill="#334155">MPF (Cdk1+Cyclin B)</text>
-              </svg>
-            </div>
-            <div class="memory">💡 MPF (M-phase promoting factor) = Cdk1 + Cyclin B</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 24 -->
-      <article class="sticky-note note-green tilt-right-1" data-category="분자생물학" data-keywords="크리스퍼 CRISPR Cas9 sgRNA PAM 유전자교정 절단">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-mol">분자생물학</span><h3 class="text-base font-bold text-slate-900">㉔ CRISPR-Cas9 유전자 교정</h3></div></summary>
-          <div class="card-content">
-            <div class="flow">
-              1. sgRNA(단일가이드RNA)가 표적 DNA 상보적 인지<br>
-              2. PAM 서열 (5'-NGG-3') 인지 후 Cas9 접근<br>
-              3. Cas9 엔도뉴클레아제가 이중가닥 절단(DSB) 유발<br>
-              4. 세포의 수선 기작 (NHEJ: 인델 변이 / HDR: 정확한 교체) 작동
-            </div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 25 -->
-      <article class="sticky-note note-purple tilt-left-1" data-category="대사·신경" data-keywords="자율신경 교감 부교감 아세틸콜린 노르에피네프린 절전 절후 신경절">
-        <div class="note-pin"></div>
-        <details open>
-          <summary><div><span class="badge badge-met">대사·신경</span><h3 class="text-base font-bold text-slate-900">㉕ 교감 vs 부교감 자율신경계</h3></div></summary>
-          <div class="card-content">
-            <div class="bg-white/80 p-2 rounded-lg border border-purple-200 mb-2">
-              <svg viewBox="0 0 320 100" class="w-full h-auto">
-                <g transform="translate(10, 10)">
-                  <text x="0" y="15" font-size="10" font-weight="bold" fill="#1e293b">교감</text>
-                  <line x1="30" y1="12" x2="70" y2="12" stroke="#ef4444" stroke-width="3"/>
-                  <circle cx="70" cy="12" r="4" fill="#ef4444"/>
-                  <text x="70" y="27" font-size="7" text-anchor="middle">ACh</text>
-                  <line x1="74" y1="12" x2="140" y2="12" stroke="#ef4444" stroke-width="2" stroke-dasharray="3,2"/>
-                  <text x="145" y="15" font-size="8" font-weight="bold" fill="#b91c1c">NE</text>
-                  <text x="50" y="38" font-size="7" fill="#64748b">절전 짧음 / 절후 긺</text>
-                </g>
-                <g transform="translate(10, 55)">
-                  <text x="0" y="15" font-size="10" font-weight="bold" fill="#1e293b">부교감</text>
-                  <line x1="35" y1="12" x2="115" y2="12" stroke="#3b82f6" stroke-width="3"/>
-                  <circle cx="115" cy="12" r="4" fill="#3b82f6"/>
-                  <text x="115" y="27" font-size="7" text-anchor="middle">ACh</text>
-                  <line x1="119" y1="12" x2="140" y2="12" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3,2"/>
-                  <text x="145" y="15" font-size="8" font-weight="bold" fill="#1d4ed8">ACh</text>
-                  <text x="75" y="38" font-size="7" fill="#64748b">절전 긺 / 절후 짧음</text>
-                </g>
-              </svg>
-            </div>
-            <div class="memory">💡 교감: 신경절 수용체 = 니코틴성 / 절후 표적 = 아드레날린성 (α, β)</div>
-          </div>
-        </details>
-      </article>
-
-      <!-- 26 -->
-      <article class="sticky-note note-orange tilt-right-2" data-category="발생·생리학" data-keywords="배엽 외배엽 중배엽 내배엽 신경관 척삭 발생">
-        <div class="note-pin"></div>
-        <details>
-          <summary><div><span class="badge badge-dev">발생·생리학</span><h3 class="text-base font-bold text-slate-900">㉖ 삼배엽 유래 기관 구분</h3></div></summary>
-          <div class="card-content">
-            <ul class="list-disc pl-4 space-y-1 text-slate-700">
-              <li><strong>외배엽 (Ectoderm):</strong> 신경계(신경관, 신경능선), 피부 표피, 감각기관, 부신 수질</li>
-              <li><strong>중배엽 (Mesoderm):</strong> 근육, 뼈, 순환계(심장, 혈관), 비뇨생식계(콩팥, 생식샘), 부신 피질, 척삭</li>
-              <li><strong>내배엽 (Endoderm):</strong> 소화관 상피, 호흡기계 상피, 간, 이자, 갑상샘</li>
-            </ul>
-            <div class="warning">⚠️ 주의: 부신 수질은 '외배엽(신경능선)', 부신 피질은 '중배엽' 유래!</div>
-          </div>
-        </details>
-      </article>
-
     </main>
 
     <div id="noResults" class="hidden text-center py-12 bg-white/50 rounded-2xl border border-dashed border-slate-300 mt-6">
@@ -922,7 +440,6 @@
     function saveList(k, v) {
       try {
         localStorage.setItem(k, JSON.stringify(v));
-        // 카테고리 변경은 별도 Firebase 모듈에 실시간 동기화를 요청합니다.
         if ((k === 'postit_custom_categories' || k === 'postit_builtin_cat_names') && typeof window.syncCategoryListToFirebase === 'function') {
           window.syncCategoryListToFirebase(k, v);
         }
@@ -1413,12 +930,10 @@
             remoteCategorySettings = data;
             return;
           }
-          // setup용 문서 등 포스트잇 데이터가 아닌 문서는 목록에서 제외합니다.
           if (typeof data.title !== 'string' || !data.title.trim()) return;
           remoteCards.set(d.id, { ...data, id: d.id, visibility: 'shared' });
         });
 
-        // 카테고리 설정도 Firestore에서 받아 모든 로그인 사용자에게 동일하게 적용합니다.
         if (remoteCategorySettings) {
           applyingRemoteCategories = true;
           try {
@@ -1432,7 +947,6 @@
           if (typeof window.refreshCategorySelect === 'function') window.refreshCategorySelect();
           if (typeof window.applyFilters === 'function') window.applyFilters();
         } else if (!categorySettingsSeen) {
-          // 설정 문서가 아직 없다면 현재 브라우저의 카테고리 설정으로 최초 생성합니다.
           categorySettingsSeen = true;
           const categories = (() => { try { return JSON.parse(localStorage.getItem('postit_custom_categories')) || []; } catch { return []; } })();
           const builtinNames = (() => { try { return JSON.parse(localStorage.getItem('postit_builtin_cat_names')) || {}; } catch { return {}; } })();
@@ -1449,7 +963,6 @@
         if (!migrationStarted) {
           migrationStarted = true;
           try {
-            // 이 브라우저에만 남아 있던 카드 중 서버에 없는 카드만 공용 목록에 추가합니다.
             for (const card of legacyCards) {
               if (!card || !card.id || !card.title || remoteCards.has(card.id)) continue;
               await setDoc(doc(db, 'postits', card.id), {
@@ -1470,8 +983,6 @@
       }));
     }
 
-    // 첫 번째 스크립트의 카테고리 저장 함수가 직접 호출하는 Firebase 동기화 함수입니다.
-    // 일반 스크립트 내부의 saveList는 window.saveList 래퍼를 거치지 않으므로 별도 연결이 필요합니다.
     window.syncCategoryListToFirebase = function (key, value) {
       if (!currentUser || !categorySettingsSeen || applyingRemoteCategories) return;
       const categories = (() => { try { return JSON.parse(localStorage.getItem('postit_custom_categories')) || []; } catch { return []; } })();
@@ -1484,7 +995,6 @@
       });
     };
 
-    // 기존 저장 함수와 연결해 카드 추가·수정·삭제를 Firestore에 반영합니다.
     window.saveList = function (key, value) {
       const oldValue = (() => { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } })();
       const saved = originalSaveList(key, value);
@@ -1514,7 +1024,6 @@
         }
         for (const [id, old] of oldMap) {
           if (!newMap.has(id)) {
-            // 모든 포스트잇은 공용이므로 로그인한 사용자가 삭제할 수 있습니다.
             await deleteDoc(doc(db, 'postits', id));
           }
         }
