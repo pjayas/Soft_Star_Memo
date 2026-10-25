@@ -424,7 +424,7 @@
           else if (n === 'href' || n === 'xlink:href' || n === 'src') {
             if (!/^(https?:|#)/i.test(v)) el.removeAttribute(a.name);
           } else if (n === 'style') {
-            if (!/^[\w\s:;.%\\-#(),]*$/.test(v) || /url\(|expression|import/i.test(v)) el.removeAttribute(a.name);
+            if (!/^[\w\s:;.%#(),\-]*$/.test(v) || /url\(|expression|import/i.test(v)) el.removeAttribute(a.name);
           }
         });
         if (el.tagName.toUpperCase() === 'A') { el.target = '_blank'; el.rel = 'noopener noreferrer'; }
@@ -786,7 +786,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const cardsRef = collection(db, 'postits');
-    const CATEGORY_SETTINGS_ID = '__category_settings__';
+    const CATEGORY_SETTINGS_ID = 'category_settings';
     const catRef = doc(db, 'postits', CATEGORY_SETTINGS_ID);
     const statusEl = document.getElementById('firebaseStatus');
     const userLabel = document.getElementById('firebaseUserLabel');
