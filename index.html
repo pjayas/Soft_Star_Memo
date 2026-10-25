@@ -115,10 +115,12 @@
       display: inline-block; padding: 0.15rem 0.5rem; font-size: 0.7rem; font-weight: 700;
       border-radius: 9999px; text-transform: uppercase; margin-bottom: 0.4rem;
     }
-    .badge-mol { background-color: #dbeafe; color: #1e40af; }
-    .badge-imm { background-color: #f3e8ff; color: #6b21a8; }
-    .badge-met { background-color: #fef3c7; color: #92400e; }
-    .badge-dev { background-color: #dcfce7; color: #166534; }
+    .badge-cell { background-color: #dbeafe; color: #1e40af; }
+    .badge-bio  { background-color: #fef3c7; color: #92400e; }
+    .badge-gen  { background-color: #f3e8ff; color: #6b21a8; }
+    .badge-mol  { background-color: #ccfbf1; color: #115e59; }
+    .badge-phys { background-color: #dcfce7; color: #166534; }
+    .badge-eco  { background-color: #ffe4e6; color: #9f1239; }
 
     svg text { font-family: 'Noto Sans KR', sans-serif; }
 
@@ -321,7 +323,7 @@
       </div>
     </header>
 
-    <!-- Cards Grid (기존 메모 내용 비움) -->
+    <!-- Cards Grid (메모 내용 비움) -->
     <main class="sticky-grid" id="cardsGrid">
     </main>
 
@@ -344,7 +346,7 @@
         이 포스트잇은 로그인한 세 사람이 함께 보고 수정할 수 있습니다.
       </div>
       <label class="block text-xs font-bold text-slate-600 mb-1">제목 *</label>
-      <input id="newTitle" maxlength="60" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400" placeholder="예: 해당과정 vs TCA 회로">
+      <input id="newTitle" maxlength="60" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400" placeholder="예: 세포막 구조 및 물질 이동">
 
       <div class="flex gap-3 mb-3">
         <div class="flex-1">
@@ -430,7 +432,17 @@
     /* ========== 새 포스트잇 생성 / 수정 / 삭제 (localStorage) ========== */
     const LS_CARDS = 'postit_custom_cards';
     const LS_HIDDEN = 'postit_hidden_builtin';
-    const BADGE = {'분자생물학':'badge-mol','면역학':'badge-imm','대사·신경':'badge-met','발생·생리학':'badge-dev'};
+    
+    /* 새롭게 지정된 6가지 분야(뱃지) 매핑 */
+    const BADGE = {
+      '세포생물학': 'badge-cell',
+      '생화학': 'badge-bio',
+      '유전학': 'badge-gen',
+      '분자생물학': 'badge-mol',
+      '인체생리학': 'badge-phys',
+      '식생분진': 'badge-eco'
+    };
+
     const TILTS = ['tilt-left-1','tilt-right-1','tilt-left-2','tilt-right-2','tilt-zero'];
     const ARROW = '<svg class="toggle-icon text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
     let editingId = null;
@@ -523,7 +535,7 @@
       document.getElementById('newBody').value = card ? card.body : '';
       document.getElementById('newMemo').value = card ? card.memo : '';
       document.getElementById('newWarn').value = card ? card.warn : '';
-      refreshCategorySelect(card ? card.category : builtinName('분자생물학'));
+      refreshCategorySelect(card ? card.category : builtinName('세포생물학'));
       setColorSelection(card ? card.color : 'yellow');
       const rich = !!(card && card.html);
       document.getElementById('textFields').classList.toggle('hidden', rich);
@@ -702,7 +714,7 @@
       });
       const o = document.createElement('option');
       o.value = '__new__'; o.textContent = '＋ 새 분야 만들기…'; sel.appendChild(o);
-      sel.value = (cats.includes(keep) || keep === '__new__') ? keep : builtinName('분자생물학');
+      sel.value = (cats.includes(keep) || keep === '__new__') ? keep : builtinName('세포생물학');
       onCatChange();
     }
 
