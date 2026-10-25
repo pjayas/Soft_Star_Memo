@@ -809,7 +809,7 @@
       TILTS.forEach(t => el.classList.remove(t));
       el.querySelectorAll('.edit-btn,.del-btn,.note-pin').forEach(x => x.remove());
       el.style.display = 'block';
-      el.querySelector('details').open = true;
+      el.querySelector('details').open = false; /* 접힌 상태로 뽑기: 제목만 보고 떠올려본 뒤 눌러서 펼침 */
       res.replaceChildren(el);
       info.textContent = `이번 바퀴에서 남은 카드: ${drawDeck.length}장 (전체 ${pool.length}장)`;
     }
