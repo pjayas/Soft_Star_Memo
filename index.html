@@ -309,11 +309,7 @@
         <div class="pt-2 pb-2">
           <label class="block text-xs font-bold text-slate-600 mb-1">주제 / 요청</label>
           <input id="aiTopic" maxlength="200" class="w-full mb-2 px-3 py-2 text-sm border border-slate-300 rounded-lg" placeholder="예: 세포막 구조 및 물질 이동 핵심 정리">
-          <div class="flex gap-2 mb-2">
-            <button type="button" id="aiBtn" onclick="aiGenerate()" class="flex-1 px-3 py-2 text-sm font-bold bg-violet-600 text-white rounded-lg">✨ 자동으로 만들기</button>
-            <button type="button" onclick="aiSetKey()" class="px-3 py-2 text-sm font-semibold bg-white text-violet-800 border border-violet-300 rounded-lg">🔑 API 키</button>
-          </div>
-          <p class="text-xs text-slate-500 mb-1">API 키 없이 쓰려면: ① 프롬프트 복사 → ChatGPT에 붙여넣기 ② 받은 답변을 아래에 붙여넣고 적용</p>
+          <p class="text-xs text-slate-500 mb-1">① 프롬프트 복사 → ChatGPT에 붙여넣기 ② 받은 답변을 아래에 붙여넣고 적용</p>
           <button type="button" onclick="aiCopyPrompt()" class="w-full mb-2 px-3 py-2 text-sm font-semibold bg-white text-violet-800 border border-violet-300 rounded-lg">📋 프롬프트 복사</button>
           <textarea id="aiPaste" rows="3" class="w-full mb-2 px-3 py-2 text-sm border border-slate-300 rounded-lg" placeholder="ChatGPT의 답변을 여기에 붙여넣기"></textarea>
           <button type="button" onclick="aiApplyPaste()" class="w-full px-3 py-2 text-sm font-semibold bg-white text-violet-800 border border-violet-300 rounded-lg">붙여넣은 답변 적용</button>
@@ -795,20 +791,7 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeMenu(); closeDraw(); closeImage(); } });
 
     /* ========== ChatGPT 연동 ========== */
-    /* 방법 1) API 키를 입력하면 주제만으로 자동 생성. 키는 이 기기의 브라우저(localStorage)에만 저장되며
-              코드·Firestore에는 올라가지 않습니다.
-       방법 2) API 키 없이: 프롬프트를 복사해 ChatGPT에 붙여넣고, 받은 답변을 붙여넣어 적용합니다. */
-    const OPENAI_MODEL = 'gpt-5-mini';   /* 모델을 바꾸려면 이 값만 수정 */
-    const LS_OPENAI = 'openai_api_key';
-    function aiGetKey() { try { return localStorage.getItem(LS_OPENAI) || ''; } catch (e) { return ''; } }
-    function aiSetKey() {
-      const k = prompt('OpenAI API 키를 입력하세요.\n(이 기기의 브라우저에만 저장돼요. 비워두고 확인하면 삭제됩니다.)', '');
-      if (k === null) return;
-      try {
-        if (k.trim()) { localStorage.setItem(LS_OPENAI, k.trim()); toast('API 키를 저장했어요'); }
-        else { localStorage.removeItem(LS_OPENAI); toast('API 키를 삭제했어요'); }
-      } catch (e) { alert('저장에 실패했습니다.'); }
-    }
+    /* 프롬프트를 복사해 ChatGPT에 붙여넣고, 받은 JSON 답변을 붙여넣어 포스트잇 칸을 채웁니다. (API 키 불필요) */
     function aiPrompt(topic) {
       return `다음 주제로 암기용 포스트잇 한 장을 만들어줘. 설명이나 코드블록 없이 JSON 객체 하나만 출력해.
 형식: {"title":"제목(60자 이내)","category":"다음 중 하나 또는 빈 문자열: ${allCats().join(', ')}","body":["핵심 내용 1","핵심 내용 2"],"memo":"암기 팁(두문자·연상법, 없으면 빈 문자열)","warn":"헷갈리기 쉬운 포인트(없으면 빈 문자열)"}
@@ -832,40 +815,6 @@
       document.getElementById('newWarn').value = String(o.warn || '').trim();
       if (o.category && allCats().includes(o.category)) { document.getElementById('newCategory').value = o.category; onCatChange(); }
       toast('내용을 채웠어요. 확인하고 수정한 뒤 추가하세요');
-    }
-    async function aiGenerate() {
-      const topic = document.getElementById('aiTopic').value.trim();
-      if (!topic) { alert('주제를 입력해주세요.'); return; }
-      let key = aiGetKey();
-      if (!key) { aiSetKey(); key = aiGetKey(); if (!key) return; }
-      const btn = document.getElementById('aiBtn');
-      btn.disabled = true; btn.textContent = '만드는 중…';
-      try {
-        const r = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-          body: JSON.stringify({
-            model: OPENAI_MODEL,
-            response_format: { type: 'json_object' },
-            messages: [
-              { role: 'system', content: '너는 생물학 암기용 포스트잇을 만드는 도우미야. 반드시 JSON 객체만 출력해.' },
-              { role: 'user', content: aiPrompt(topic) }
-            ]
-          })
-        });
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) {
-          const msg = (data.error && data.error.message) || ('오류 ' + r.status);
-          alert((r.status === 401 ? 'API 키가 올바르지 않아요. 🔑 API 키에서 다시 입력해주세요.\n' : 'ChatGPT 요청에 실패했어요.\n') + msg);
-          return;
-        }
-        aiApply(aiParse(data.choices[0].message.content));
-      } catch (e) {
-        console.error(e);
-        alert('결과를 처리하지 못했어요. 다시 시도해주세요.\n' + e.message);
-      } finally {
-        btn.disabled = false; btn.textContent = '✨ 자동으로 만들기';
-      }
     }
     async function aiCopyPrompt() {
       const text = aiPrompt(document.getElementById('aiTopic').value.trim());
