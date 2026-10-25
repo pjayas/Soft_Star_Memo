@@ -489,8 +489,22 @@
         .map(src => `<img src="${src}" alt="첨부 이미지" loading="lazy" onclick="viewImage(this.src)">`).join('');
       el.innerHTML = `
         <div class="note-pin"></div>
-        <div class="text-xs font-semibold text-slate-600 mb-2">
-          작성자: ${esc(c.createdByEmail || (c.ownerUid ? '기존 작성자' : '작성자 미상'))}
+        <div class="mb-2 border-b border-black/10 pb-2">
+          <div class="text-xs font-semibold text-slate-600">
+            작성자: ${esc(c.createdByEmail || (c.ownerUid ? '기존 작성자' : '작성자 미상'))}
+          </div>
+          <div class="mt-1 text-xs text-slate-500">
+            작성 시간: ${esc(c.createdAt
+              ? new Date(c.createdAt).toLocaleString('ko-KR', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false
+                })
+              : '시간 미등록')}
+          </div>
         </div>
         <button class="edit-btn" title="수정" onclick="editCard(this)">✎</button>
         <button class="del-btn" title="삭제" onclick="deleteCard(this)">✕</button>
@@ -576,6 +590,7 @@
           tilt: TILTS[Math.floor(Math.random() * TILTS.length)],
           ownerUid: window.fbCurrentUser.uid,
           createdByEmail: window.fbCurrentUser.email || '이름 미등록',
+          createdAt: Date.now(),
           visibility: 'shared'
         }, data);
         list.push(card);
