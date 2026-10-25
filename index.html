@@ -823,7 +823,7 @@
       <h2 id="modalTitle" class="text-lg font-extrabold text-slate-800 mb-3">새 포스트잇 만들기</h2>
 
       <div class="mb-3 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-800">
-        이 포스트잇은 로그인한 사람이 함께 보고 수정할 수 있습니다.
+        이 포스트잇은 로그인한 세 사람이 함께 보고 수정할 수 있습니다.
       </div>
       <label class="block text-xs font-bold text-slate-600 mb-1">제목 *</label>
       <input id="newTitle" maxlength="60" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400" placeholder="예: 해당과정 vs TCA 회로">
@@ -920,8 +920,17 @@
     const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     function loadList(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch (e) { return []; } }
     function saveList(k, v) {
-      try { localStorage.setItem(k, JSON.stringify(v)); return true; }
-      catch (e) { alert('저장에 실패했습니다. 브라우저의 저장소 차단 여부를 확인해주세요.'); return false; }
+      try {
+        localStorage.setItem(k, JSON.stringify(v));
+        // 카테고리 변경은 별도 Firebase 모듈에 실시간 동기화를 요청합니다.
+        if ((k === 'postit_custom_categories' || k === 'postit_builtin_cat_names') && typeof window.syncCategoryListToFirebase === 'function') {
+          window.syncCategoryListToFirebase(k, v);
+        }
+        return true;
+      } catch (e) {
+        alert('저장에 실패했습니다. 브라우저의 저장소 차단 여부를 확인해주세요.');
+        return false;
+      }
     }
     let toastTimer;
     function toast(msg) {
@@ -1329,6 +1338,9 @@
     let remoteReady = false;
     let remoteCards = new Map();
     let writeQueue = Promise.resolve();
+    let applyingRemoteCategories = false;
+    let categorySettingsSeen = false;
+    const CATEGORY_SETTINGS_ID = '__category_settings__';
 
     window.fbCurrentUser = null;
     function setStatus(message, isError = false) {
@@ -1394,12 +1406,45 @@
 
       snapshotStops.push(onSnapshot(cardsRef, async snap => {
         remoteCards.clear();
+        let remoteCategorySettings = null;
         snap.forEach(d => {
           const data = d.data();
+          if (d.id === CATEGORY_SETTINGS_ID && data.type === 'category_settings') {
+            remoteCategorySettings = data;
+            return;
+          }
           // setup용 문서 등 포스트잇 데이터가 아닌 문서는 목록에서 제외합니다.
           if (typeof data.title !== 'string' || !data.title.trim()) return;
           remoteCards.set(d.id, { ...data, id: d.id, visibility: 'shared' });
         });
+
+        // 카테고리 설정도 Firestore에서 받아 모든 로그인 사용자에게 동일하게 적용합니다.
+        if (remoteCategorySettings) {
+          applyingRemoteCategories = true;
+          try {
+            localStorage.setItem('postit_custom_categories', JSON.stringify(Array.isArray(remoteCategorySettings.categories) ? remoteCategorySettings.categories : []));
+            localStorage.setItem('postit_builtin_cat_names', JSON.stringify(remoteCategorySettings.builtinNames && typeof remoteCategorySettings.builtinNames === 'object' ? remoteCategorySettings.builtinNames : {}));
+          } finally {
+            applyingRemoteCategories = false;
+          }
+          categorySettingsSeen = true;
+          if (typeof window.renderCatButtons === 'function') window.renderCatButtons();
+          if (typeof window.refreshCategorySelect === 'function') window.refreshCategorySelect();
+          if (typeof window.applyFilters === 'function') window.applyFilters();
+        } else if (!categorySettingsSeen) {
+          // 설정 문서가 아직 없다면 현재 브라우저의 카테고리 설정으로 최초 생성합니다.
+          categorySettingsSeen = true;
+          const categories = (() => { try { return JSON.parse(localStorage.getItem('postit_custom_categories')) || []; } catch { return []; } })();
+          const builtinNames = (() => { try { return JSON.parse(localStorage.getItem('postit_builtin_cat_names')) || {}; } catch { return {}; } })();
+          try {
+            await setDoc(doc(db, 'postits', CATEGORY_SETTINGS_ID), {
+              type: 'category_settings', categories, builtinNames, updatedAt: Date.now()
+            }, { merge: true });
+          } catch (error) {
+            console.error(error);
+            setStatus('카테고리 설정을 동기화하지 못했습니다. Firestore 규칙을 확인해주세요.', true);
+          }
+        }
 
         if (!migrationStarted) {
           migrationStarted = true;
@@ -1425,11 +1470,38 @@
       }));
     }
 
+    // 첫 번째 스크립트의 카테고리 저장 함수가 직접 호출하는 Firebase 동기화 함수입니다.
+    // 일반 스크립트 내부의 saveList는 window.saveList 래퍼를 거치지 않으므로 별도 연결이 필요합니다.
+    window.syncCategoryListToFirebase = function (key, value) {
+      if (!currentUser || !categorySettingsSeen || applyingRemoteCategories) return;
+      const categories = (() => { try { return JSON.parse(localStorage.getItem('postit_custom_categories')) || []; } catch { return []; } })();
+      const builtinNames = (() => { try { return JSON.parse(localStorage.getItem('postit_builtin_cat_names')) || {}; } catch { return {}; } })();
+      writeQueue = writeQueue.then(() => setDoc(doc(db, 'postits', CATEGORY_SETTINGS_ID), {
+        type: 'category_settings', categories, builtinNames, updatedAt: Date.now()
+      }, { merge: true })).catch(error => {
+        console.error('카테고리 저장 동기화 오류:', error);
+        setStatus('카테고리 저장 동기화에 실패했습니다. Firestore 규칙을 확인해주세요.', true);
+      });
+    };
+
     // 기존 저장 함수와 연결해 카드 추가·수정·삭제를 Firestore에 반영합니다.
     window.saveList = function (key, value) {
       const oldValue = (() => { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } })();
       const saved = originalSaveList(key, value);
-      if (!saved || key !== 'postit_custom_cards' || applyingRemote || !currentUser || !remoteReady) return saved;
+      if (!saved || applyingRemote || applyingRemoteCategories || !currentUser) return saved;
+      if (key === 'postit_custom_categories' || key === 'postit_builtin_cat_names') {
+        if (!categorySettingsSeen) return saved;
+        const categories = (() => { try { return JSON.parse(localStorage.getItem('postit_custom_categories')) || []; } catch { return []; } })();
+        const builtinNames = (() => { try { return JSON.parse(localStorage.getItem('postit_builtin_cat_names')) || {}; } catch { return {}; } })();
+        writeQueue = writeQueue.then(() => setDoc(doc(db, 'postits', CATEGORY_SETTINGS_ID), {
+          type: 'category_settings', categories, builtinNames, updatedAt: Date.now()
+        }, { merge: true })).catch(error => {
+          console.error(error);
+          setStatus('카테고리 저장 동기화에 실패했습니다. Firestore 규칙을 확인해주세요.', true);
+        });
+        return saved;
+      }
+      if (key !== 'postit_custom_cards' || !remoteReady) return saved;
       const oldMap = new Map(oldValue.map(c => [c.id, c]));
       const newMap = new Map(value.map(c => [c.id, c]));
       writeQueue = writeQueue.then(async () => {
@@ -1459,6 +1531,7 @@
       stopSnapshots();
       remoteReady = false;
       remoteCards = new Map();
+      categorySettingsSeen = false;
       if (!user) {
         document.body.classList.add('signed-out');
         document.getElementById('boardContent').classList.add('hidden');
