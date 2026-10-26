@@ -492,7 +492,7 @@
       const exact = COLOR_PRESETS.find(p => p.hex.toLowerCase() === s.toLowerCase());
       if (exact) return exact.hex;
       if (LEGACY_COLOR[s]) return LEGACY_COLOR[s];
-      if (/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(s))
+      if (/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(s)) {   // ← 여기 { 가 빠져 있었음
         const [r, g, b] = hexToRgb(s);
         let best = DEFAULT_COLOR, bestD = Infinity;
         COLOR_PRESETS.forEach(p => {
@@ -517,7 +517,7 @@
       c.ownerUid === window.fbCurrentUser.uid;
       const el = document.createElement('article');
       const color = normalizeColor(c.color);
-      el.className = `sticky-note note-custom ${c.tilt}`;
+      el.className = `sticky-note note-custom ${c.tilt || 'tilt-zero'}`;
       el.style.background = `linear-gradient(135deg, ${color} 0%, ${shade(color, 0.05)} 100%)`;
       el.style.borderTopColor = shade(color, 0.14);
       /* 💡 메모도 카드 색 계열의 연한색 */
