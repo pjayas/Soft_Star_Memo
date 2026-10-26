@@ -506,10 +506,8 @@
               : '시간 미등록')}
           </div>
         </div>
-        ${window.fbCurrentUser
-          ? `<button class="edit-btn" title="수정" onclick="editCard(this)">✎</button>
-             <button class="del-btn" title="삭제" onclick="deleteCard(this)">✕</button>`
-          : ''}
+        <button class="edit-btn" title="수정" onclick="editCard(this)">✎</button>
+        <button class="del-btn" title="삭제" onclick="deleteCard(this)">✕</button>
         <details ${c.html ? '' : 'open'}>
           <summary><div>
             <span class="badge ${badgeClass(c.category)}">${esc(c.category)}</span>
@@ -611,47 +609,22 @@
       if (card) openModal(card);
     }
 
-
-    
     function deleteCard(btn) {
       if (!requireReady()) return;
-    
       const card = btn.closest('.sticky-note');
-      const id = card.dataset.customId;
-    
-      // 모든 로그인 사용자가 포스트잇을 삭제할 수 있습니다.
       const name = card.querySelector('h3').textContent;
-    
       if (!confirm(`"${name}" 포스트잇을 삭제할까요?`)) return;
-    
-      if (id) {
-        const list = loadList(LS_CARDS);
-        const myCard = list.find(c => c.id === id);
-    
-        if (!myCard) {
-          alert('포스트잇을 찾을 수 없습니다. 새로고침 후 다시 시도해주세요.');
-          return;
-        }
-    
-        saveList(LS_CARDS, list.filter(c => c.id !== id));
+      if (card.dataset.customId) {
+        saveList(LS_CARDS, loadList(LS_CARDS).filter(c => c.id !== card.dataset.customId));
       } else {
-        // 기본 제공 카드는 기존처럼 내 화면에서만 숨깁니다.
         const hidden = loadList(LS_HIDDEN);
-        const builtinId = card.dataset.builtinId;
-    
-        if (!builtinId) return;
-    
-        if (!hidden.includes(builtinId)) {
-          hidden.push(builtinId);
-          saveList(LS_HIDDEN, hidden);
-        }
+        hidden.push(card.dataset.builtinId);
+        saveList(LS_HIDDEN, hidden);
       }
-    
       card.remove();
       applyFilters();
       toast('삭제되었습니다');
     }
-
 
     /* ========== 색상 선택 ========== */
     const COLOR_PRESETS = [
@@ -840,16 +813,13 @@
     }
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeMenu(); closeDraw(); closeImage(); } });
+
     /* ========== ChatGPT 연동 ========== */
     /* 프롬프트를 복사해 ChatGPT에 붙여넣고, 받은 JSON 답변을 붙여넣어 포스트잇 칸을 채웁니다. (API 키 불필요) */
-    
     function aiPrompt(topic) {
-      return `다음 주제로 시험 대비용 암기 포스트잇 한 장을 만들어줘.
-    설명이나 코드블록 없이 JSON 객체 하나만 출력해.
-    형식:
-    {"title":"제목(60자 이내)","category":"다음 중 하나 또는 빈 문자열: ${allCats().join(', ')}","body":["핵심 개념과 작용 원리","주요 종류와 작용 지점","작용 과정과 결과","비슷한 개념과의 차이","시험에 중요한 핵심 내용"],"memo":"암기하기 쉬운 포인트 또는 함께 기억하면 좋은 연관 주제(없으면 빈 문자열)","warn":"사용자가 헷갈려했던 개념과 오답으로 이어지기 쉬운 포인트(없으면 빈 문자열)"}
-    작성 규칙:
-    
+return `다음 주제로 시험 대비용 암기 포스트잇 한 장을 만들어줘. 설명이나 코드블록 없이 JSON 객체 하나만 출력해.
+형식: {"title":"제목(60자 이내)","category":"다음 중 하나 또는 빈 문자열: ${allCats().join(', ')}","body":["핵심 개념과 작용 원리","주요 종류와 작용 지점","작용 과정과 결과","비슷한 개념과의 차이","시험에 중요한 핵심 내용"],"memo":"두문자·연상법·비교 문구 등 시험 직전에 떠올리기 쉬운 암기 팁(없으면 빈 문자열)","warn":"시험에서 헷갈리기 쉬운 개념, 자주 하는 실수, 반드시 구분해야 하는 내용(없으면 빈 문자열)"}
+규칙:
     0. 제목(title)은 주제를 보자마자 어떤 내용인지 알 수 있도록 명료하고 구체적으로 작성하기. 추상적인 제목이나 단순한 과목명은 피하기.
     1. 한국어를 기본으로 작성하되, 전공 핵심 용어는 가능한 한 English term으로 작성하기. 필요한 경우에만 한국어로 짧게 보충 설명하기.
     2. 설명형 문장이나 긴 서술형 문장은 피하고, 핵심 키워드·짧은 구절·화살표(→)·기호를 활용한 포인트 압축형으로 작성하기.
@@ -866,14 +836,12 @@
         ③ 유사 개념의 비교·대조
         ④ 자주 출제되는 혼동 포인트
         ⑤ 암기 팁 및 연관 개념
-    
     11. 주제에 따라 구성을 유연하게 변경하기. 모든 주제에 동일한 항목을 억지로 적용하지 말고, 해당 주제에 가장 적합한 핵심 내용으로 작성하기.
     12. 정확성을 우선하기. 전공 용어를 잘못 사용하거나 서로 다른 개념을 혼동하지 않기. 불확실한 내용은 사실처럼 만들어내지 않기.
     13. 마크다운 문법을 사용하지 않기. 단, body 문자열 내부에서는 화살표(→), 비교 기호(≠, vs), 괄호 등을 활용할 수 있음.
     14. JSON 문법을 반드시 지키기. 키와 문자열은 큰따옴표로 감싸고, 문자열 내부의 큰따옴표는 이스케이프 처리하기. JSON 객체 이외의 설명, 인사말, 코드블록은 출력하지 않기.
     15. 결과는 바로 복사하여 붙여넣을 수 있는 유효한 JSON 객체 하나로 출력하기.
-    주제: ${topic || '(여기에 주제를 적어주세요)'}`;
-    }
+주제: ${topic || '(여기에 주제를 적어주세요)'}`;
     }
     function aiParse(text) {
       let t = String(text || '').replace(/```(?:json)?/gi, '');
