@@ -91,7 +91,9 @@
 
     svg text { font-family: 'Noto Sans KR', sans-serif; }
     .filter-btn.active { background-color: #1e293b; color: #ffffff; border-color: #1e293b; }
-
+    .filter-btn[data-cat] { background-color: var(--cat, #fff); color: #1e293b; }
+    .filter-btn[data-cat].active { background-color: var(--cat, #fff); color: #0f172a; border-color: #1e293b; box-shadow: inset 0 0 0 2px #1e293b; font-weight: 700; }
+    
     .rich-content { overflow-x: auto; }
     .rich-content h3 { font-size: 1em; font-weight: 700; margin: 16px 0 6px; }
     .rich-content p { margin: 6px 0; }
@@ -312,7 +314,7 @@
       <div class="flex gap-3 mb-3">
         <div class="flex-1">
           <label class="block text-xs font-bold text-slate-600 mb-1">분야</label>
-          <select id="newCategory" onchange="onCatChange()" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"></select>
+          <select id="newCategory" onchange="onCatChange(true)" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"></select>
           <input id="newCatInput" maxlength="12" placeholder="새 분야 이름 (12자 이내)" class="hidden w-full mt-1.5 px-3 py-2 text-sm border border-sky-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300">
         </div>
       </div>
@@ -365,7 +367,9 @@
   </div>
 
   <div id="imgViewer" class="modal-bg" onclick="closeImage()"><img id="imgViewerImg" alt=""></div>
-
+    <div id="catColorModal" class="modal-bg" onclick="if(event.target===this)closeCatColor()">
+      <div id="catColorBox" class="bg-white shadow-2xl w-full p-5" style="border-radius:22px 22px 0 0;max-width:28rem;padding-bottom:calc(1.25rem + env(safe-area-inset-bottom))"></div>
+    </div>
   <div id="toast"></div>
 
   <script>
@@ -540,8 +544,7 @@
       modalImages = card && Array.isArray(card.images) ? card.images.slice() : [];
       renderImgPreview();
       refreshCategorySelect(card ? card.category : (allCats()[0] || '__new__'));
-      setColorSelection(card ? card.color : 'yellow');
-      const rich = !!(card && card.html);
+      setColorSelection(card ? card.color : (document.getElementById('newCategory').value === '__new__' ? 'yellow' : catColor(document.getElementById('newCategory').value)));      const rich = !!(card && card.html);
       document.getElementById('textFields').classList.toggle('hidden', rich);
       document.getElementById('aiBox').classList.toggle('hidden', rich);
       document.getElementById('richNote').classList.toggle('hidden', !rich);
@@ -564,7 +567,7 @@
         if (category.length > 12) { alert('분야 이름은 12자 이내로 입력해주세요.'); return; }
         if (category === '전체보기') { alert('사용할 수 없는 이름입니다.'); return; }
       }
-      registerCat(category);
+      registerCat(category, getSelectedColor());
       const data = {
         title, category, color: getSelectedColor(),
         body: document.getElementById('newBody').value,
@@ -627,13 +630,30 @@
 
     /* ========== 색상 선택 ========== */
     const COLOR_PRESETS = [
-      { id: 'red',    hex: '#FFB8B8', label: '연한 빨강' },
-      { id: 'yellow', hex: '#FFF9B8', label: '연한 노랑' },
-      { id: 'green',  hex: '#BEFFB8', label: '연한 초록' },
-      { id: 'blue',   hex: '#B8FDFF', label: '연한 파랑' },
-      { id: 'purple', hex: '#D3B8FF', label: '연한 보라' }
+      { id: 'red',    hex: '#FFCCCC', label: '연한 빨강' },
+      { id: 'yellow', hex: '#FDFFCC', label: '연한 노랑' },
+      { id: 'green',  hex: '#CCFFCC', label: '연한 초록' },
+      { id: 'blue',   hex: '#CCE5FF', label: '연한 파랑' },
+      { id: 'purple', hex: '#E5CCFF', label: '연한 보라' }
     ];
-
+        const LS_CCOLORS = 'postit_cat_colors';
+    /* 기본 분야의 처음 색 (🎨에서 언제든 바꿀 수 있음) */
+    const DEFAULT_CAT_COLORS = {
+      '세포생물학': 'blue', '생화학': 'yellow', '유전학': 'purple',
+      '분자생물학': 'green', '인체생리학': 'red', '식생분진': '#FFD9A8'
+    };
+    function defaultCatColor(name) {
+      if (DEFAULT_CAT_COLORS[name]) return DEFAULT_CAT_COLORS[name];
+      let h = 0;
+      for (const ch of String(name)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      return COLOR_PRESETS[h % COLOR_PRESETS.length].id;
+    }
+    function catColor(name) { return loadMap(LS_CCOLORS)[name] || defaultCatColor(name); }
+    function colorToHex(c) {
+      if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
+      const p = COLOR_PRESETS.find(x => x.id === c);
+      return p ? p.hex : '#e2e8f0';
+    }
     function mixWhite(hex, t) {
       const n = parseInt(hex.slice(1), 16);
       const m = v => Math.round(v + (255 - v) * t);
@@ -701,12 +721,16 @@
     function customCats() { return loadList(LS_CATS).filter(n => !ORIG_CATS.includes(n)); }
     function allCats() { return builtinNames().concat(customCats()); }
 
-    function registerCat(name) {
+    function registerCat(name, color) {
       if (!name || builtinNames().includes(name) || name === '전체보기') return;
       if (loadList(LS_CATS).includes(name)) return;
       if (!window.fbCurrentUser || !window.fbReady || !window.fbCatOp) return;
-      window.fbCatOp(s => { if (!s.categories.includes(name)) s.categories.push(name); })
-        .catch(err => { console.error(err); toast('분야 저장에 실패했습니다.'); });
+      window.fbCatOp(s => {
+        if (!s.categories.includes(name)) {
+          s.categories.push(name);
+          if (color && !s.colors[name]) s.colors[name] = color;
+        }
+      }).catch(err => { console.error(err); toast('분야 저장에 실패했습니다.'); });
     }
 
     function refreshCategorySelect(selected) {
@@ -725,12 +749,15 @@
       onCatChange();
     }
 
-    function onCatChange() {
-      const isNew = document.getElementById('newCategory').value === '__new__';
-      const inp = document.getElementById('newCatInput');
-      inp.classList.toggle('hidden', !isNew);
-      if (isNew) inp.focus(); else inp.value = '';
-    }
+      function onCatChange(byUser) {
+        const sel = document.getElementById('newCategory');
+        const isNew = sel.value === '__new__';
+        const inp = document.getElementById('newCatInput');
+        inp.classList.toggle('hidden', !isNew);
+        if (isNew) inp.focus(); else inp.value = '';
+        /* 새 포스트잇을 만들 때, 사용자가 분야를 고르면 그 분야의 색을 자동 선택 */
+        if (byUser === true && !isNew && editingId === null) setColorSelection(catColor(sel.value));
+      }
 
     function renderCatButtons() {
       const box = document.getElementById('categoryFilters');
@@ -739,10 +766,16 @@
         const wrap = document.createElement('span');
         wrap.className = 'inline-flex';
         const b = document.createElement('button');
-        b.className = 'filter-btn px-3 py-1.5 text-xs font-medium ' + (deletable ? 'rounded-l-lg' : 'rounded-lg') + ' border border-slate-300 transition hover:bg-slate-100';
+        b.className = 'filter-btn px-3 py-1.5 text-xs font-medium rounded-l-lg border border-slate-300 transition';
         b.dataset.cat = name; b.textContent = name;
+        b.style.setProperty('--cat', colorToHex(catColor(name)));
         b.onclick = () => filterCategory(name);
         wrap.append(b);
+        const c = document.createElement('button');
+        c.className = 'px-1.5 py-1.5 text-xs border border-l-0 border-slate-300 text-slate-500 bg-white hover:bg-slate-100' + (deletable ? '' : ' rounded-r-lg');
+        c.title = '분야 색상 변경'; c.textContent = '🎨';
+        c.onclick = () => openCatColor(name);
+        wrap.append(c);
         if (deletable) {
           const e = document.createElement('button');
           e.className = 'px-1.5 py-1.5 text-xs border border-l-0 border-slate-300 text-slate-400 hover:bg-sky-100 hover:text-sky-700';
@@ -784,7 +817,10 @@
       const affected = loadList(LS_CARDS).filter(c => c.category === oldName).map(c => c.id);
       window.fbCatOp(s => {
         if (orig) { if (name === orig) delete s.builtinNames[orig]; else s.builtinNames[orig] = name; }
-        else s.categories = s.categories.map(n => n === oldName ? name : n);
+        else {
+        s.categories = s.categories.map(n => n === oldName ? name : n);
+        if (s.colors[oldName] !== undefined) { s.colors[name] = s.colors[oldName]; delete s.colors[oldName]; }
+      }
       }, affected.map(id => ({ id, category: name })))
         .then(() => { if (currentCategory === oldName) currentCategory = name; toast('분야 이름이 변경되었습니다'); })
         .catch(err => { console.error(err); alert('분야 이름 변경에 실패했습니다. 아무것도 변경되지 않았습니다. 네트워크와 Firestore 규칙을 확인해주세요.'); });
@@ -798,11 +834,47 @@
         return;
       }
       if (!confirm(`"${name}" 분야를 삭제할까요?`)) return;
-      window.fbCatOp(s => { s.categories = s.categories.filter(n => n !== name); })
+        window.fbCatOp(s => { s.categories = s.categories.filter(n => n !== name); delete s.colors[name]; })
         .then(() => { if (currentCategory === name) filterCategory('all'); toast('분야가 삭제되었습니다'); })
         .catch(err => { console.error(err); alert('분야 삭제에 실패했습니다.'); });
     }
-
+    let catColorTarget = null;
+    function openCatColor(name) {
+      if (!requireReady()) return;
+      catColorTarget = name;
+      const cur = colorToHex(catColor(name)).toLowerCase();
+      const sw = COLOR_PRESETS.map(c =>
+        `<button type="button" class="swatch" title="${c.label}" style="background:${c.hex};${c.hex.toLowerCase() === cur ? 'border-color:#1e293b;transform:scale(1.15);' : ''}" onclick="pickCatColor('${c.id}')"></button>`
+      ).join('');
+      document.getElementById('catColorBox').innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-extrabold text-slate-800">🎨 분야 색상 변경</h2>
+          <button type="button" onclick="closeCatColor()" style="width:40px;min-height:40px;color:#94a3b8">✕</button>
+        </div>
+        <p class="text-sm text-slate-600 mb-3"><b>${esc(name)}</b> 분야를 고르면 이 색이 자동으로 선택됩니다.</p>
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+          ${sw}
+          <label title="직접 고르기" class="relative inline-block" style="width:38px;height:38px">
+            <span class="swatch" style="background:conic-gradient(#f44336,#ffeb3b,#4caf50,#00bcd4,#3f51b5,#e91e63,#f44336)"></span>
+            <input type="color" value="${cur}" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="pickCatColor(this.value)">
+          </label>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">맨 끝 무지개 원: 원하는 색 직접 고르기</p>
+        <button type="button" onclick="closeCatColor()" style="width:100%;min-height:48px;border-radius:12px;font-weight:700;background:#e2e8f0">닫기</button>`;
+      document.getElementById('catColorModal').classList.add('show');
+    }
+    function closeCatColor() {
+      const m = document.getElementById('catColorModal');
+      if (m) m.classList.remove('show');
+      catColorTarget = null;
+    }
+    function pickCatColor(color) {
+      const name = catColorTarget;
+      if (name === null) return;
+      window.fbCatOp(s => { s.colors[name] = color; })
+        .then(() => { toast('분야 색상이 변경되었습니다'); closeCatColor(); })
+        .catch(err => { console.error(err); alert('색상 변경에 실패했습니다.'); });
+    }
     function openMenu() { document.getElementById('menuSheet').classList.add('show'); }
     function closeMenu() { document.getElementById('menuSheet').classList.remove('show'); }
     function toggleAllSmart() {
@@ -810,8 +882,7 @@
       toggleAll(!ds.some(d => d && d.open));
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeMenu(); closeDraw(); closeImage(); } });
-
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeMenu(); closeDraw(); closeImage(); closeCatColor(); } });
     /* ========== ChatGPT 연동 ========== */
     /* 프롬프트를 복사해 ChatGPT에 붙여넣고, 받은 JSON 답변을 붙여넣어 포스트잇 칸을 채웁니다. (API 키 불필요) */
     function aiPrompt(topic) {
@@ -864,13 +935,34 @@
       document.getElementById('newBody').value = body.map(x => String(x).trim()).filter(Boolean).join('\n');
       document.getElementById('newMemo').value = String(o.memo || '').trim();
       document.getElementById('newWarn').value = String(o.warn || '').trim();
-      if (o.category && allCats().includes(o.category)) { document.getElementById('newCategory').value = o.category; onCatChange(); }
+      if (o.category && allCats().includes(o.category)) { document.getElementById('newCategory').value = o.category; onCatChange(true); }
       toast('내용을 채웠어요. 확인하고 수정한 뒤 추가하세요');
     }
     async function aiCopyPrompt() {
       const text = aiPrompt(document.getElementById('aiTopic').value.trim());
-      try { await navigator.clipboard.writeText(text); toast('프롬프트를 복사했어요. ChatGPT에 붙여넣으세요'); }
-      catch (e) { prompt('아래 내용을 복사해서 ChatGPT에 붙여넣으세요', text); }
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          throw new Error('Clipboard API unavailable');
+        }
+        toast('프롬프트를 복사했어요. ChatGPT에 붙여넣으세요');
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        temp.setAttribute('readonly', '');
+        temp.style.position = 'fixed';
+        temp.style.opacity = '0';
+        temp.style.pointerEvents = 'none';
+        document.body.appendChild(temp);
+        temp.select();
+        temp.setSelectionRange(0, temp.value.length);
+        let copied = false;
+        try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
+        temp.remove();
+        if (copied) toast('프롬프트를 복사했어요. ChatGPT에 붙여넣으세요');
+        else alert('자동 복사에 실패했습니다. 브라우저 권한을 확인한 뒤 다시 눌러주세요.');
+      }
     }
     function aiApplyPaste() {
       try { aiApply(aiParse(document.getElementById('aiPaste').value)); }
@@ -1101,14 +1193,15 @@
         const cur = snap.exists() ? snap.data() : {};
         const s = {
           categories: Array.isArray(cur.categories) ? [...cur.categories] : [],
-          builtinNames: (cur.builtinNames && typeof cur.builtinNames === 'object') ? { ...cur.builtinNames } : {}
+          builtinNames: (cur.builtinNames && typeof cur.builtinNames === 'object') ? { ...cur.builtinNames } : {},
+          colors: (cur.colors && typeof cur.colors === 'object' && !Array.isArray(cur.colors)) ? { ...cur.colors } : {}
         };
         fn(s, snap.exists());
-        tx.set(catRef, { type: 'category_settings', categories: s.categories, builtinNames: s.builtinNames, updatedAt: Date.now() }, { merge: true });
+        tx.set(catRef, { type: 'category_settings', categories: s.categories, builtinNames: s.builtinNames, colors: s.colors, updatedAt: Date.now() });
         cardUpdates.forEach(u => tx.update(doc(db, 'postits', u.id), { category: u.category, updatedAt: Date.now() }));
       });
     };
-
+    localStorage.setItem('postit_cat_colors', JSON.stringify(remoteCategorySettings.colors && typeof remoteCategorySettings.colors === 'object' ? remoteCategorySettings.colors : {}));
     function stopSnapshots() {
       snapshotStops.forEach(stop => stop());
       snapshotStops = [];
