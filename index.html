@@ -509,10 +509,8 @@
               : '시간 미등록')}
           </div>
         </div>
-        ${isOwner
-          ? `<button class="edit-btn" title="수정"
-               onclick="editCard(this)">✎</button>`
-          : ''}
+        <button class="edit-btn" title="수정"
+          onclick="editCard(this)">✎</button>
         
         ${isOwner
           ? `<button class="del-btn" title="삭제"
