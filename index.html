@@ -48,19 +48,8 @@
       border-radius: 0 0 0 6px; pointer-events: none;
     }
 
-    .note-yellow { background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%); border-top: 28px solid #fbc02d; }
-    .note-blue   { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-top: 28px solid #1e88e5; }
-    .note-green  { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-top: 28px solid #43a047; }
-    .note-purple { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-top: 28px solid #8e24aa; }
-    .note-red    { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-top: 28px solid #e53935; }
-    .note-pink   { background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%); border-top: 28px solid #ec407a; }
-    .note-sky    { background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); border-top: 28px solid #29b6f6; }
-    .note-teal   { background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); border-top: 28px solid #00897b; }
-    .note-lime   { background: linear-gradient(135deg, #f9fbe7 0%, #f0f4c3 100%); border-top: 28px solid #afb42b; }
-    .note-brown  { background: linear-gradient(135deg, #efebe9 0%, #d7ccc8 100%); border-top: 28px solid #8d6e63; }
-    .note-gray   { background: linear-gradient(135deg, #eceff1 0%, #cfd8dc 100%); border-top: 28px solid #78909c; }
-    .note-custom { border-top: 28px solid #999; }
-    .note-orange { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-top: 28px solid #fb8c00; }
+    /* 카드 색은 JS(buildCard)에서 5가지 연한 프리셋 중 하나로 지정됩니다 */
+    .note-custom { border-top: 28px solid #ddd; background: #FFFFD6; }
 
     .note-pin {
       position: absolute; top: -18px; left: 50%; width: 80px; height: 22px;
@@ -80,10 +69,11 @@
     .toggle-icon { transition: transform 0.2s ease; width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
     details[open] .toggle-icon { transform: rotate(180deg); }
 
-    .card-content { margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px solid #cbd5e1; font-size: 0.9rem; line-height: 1.55; }
+    .card-content { margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px solid rgba(0,0,0,.12); font-size: 0.9rem; line-height: 1.55; }
     .flow { background-color: rgba(255,255,255,0.65); border-left: 3px solid #3b82f6; padding: 0.5rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin: 0.5rem 0; font-weight: 500; }
     .warning { background-color: rgba(254,242,242,0.85); border-left: 3px solid #ef4444; color: #991b1b; padding: 0.5rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; margin: 0.5rem 0; font-size: 0.85rem; }
-    .memory { background-color: rgba(240,253,244,0.9); border: 1px dashed #22c55e; color: #14532d; padding: 0.5rem 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0; font-weight: 600; display: flex; align-items: center; gap: 0.375rem; }
+    /* 💡 메모: 카드 색에 맞춘 연한색 (색은 buildCard에서 --memo-bg / --memo-border로 지정) */
+    .memory { background-color: var(--memo-bg, rgba(255,255,255,.6)); border: 1px dashed var(--memo-border, rgba(0,0,0,.25)); color: #334155; padding: 0.5rem 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0; font-weight: 600; display: flex; align-items: center; gap: 0.375rem; }
     .badge { display: inline-block; padding: 0.15rem 0.5rem; font-size: 0.7rem; font-weight: 700; border-radius: 9999px; text-transform: uppercase; margin-bottom: 0.4rem; }
     .badge-cell { background-color: #dbeafe; color: #1e40af; }
     .badge-bio  { background-color: #fef3c7; color: #92400e; }
@@ -119,7 +109,7 @@
 
     .del-btn, .edit-btn {
       position: absolute; top: -25px; width: 22px; height: 22px; border-radius: 9999px;
-      background: rgba(255,255,255,.3); color: #fff; font-size: 13px; line-height: 22px; text-align: center;
+      background: rgba(0,0,0,.25); color: #fff; font-size: 13px; line-height: 22px; text-align: center;
       border: 0; cursor: pointer; z-index: 5; transition: background .15s;
     }
     .del-btn { right: 6px; font-weight: 700; }
@@ -128,7 +118,8 @@
     .edit-btn:hover { background: #0ea5e9; }
     .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
     .modal-bg.show { display: flex; }
-    .swatch { width: 28px; height: 28px; border-radius: 9999px; border: 3px solid transparent; cursor: pointer; display: inline-block; transition: transform .15s; }
+    /* 연한 색이 흰 배경에서도 보이도록 안쪽 테두리 추가 */
+    .swatch { width: 28px; height: 28px; border-radius: 9999px; border: 3px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.18); cursor: pointer; display: inline-block; transition: transform .15s; }
     input[name="newColor"]:checked + .swatch { border-color: #1e293b; transform: scale(1.15); }
     #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px); background: #1e293b; color: #fff; padding: .6rem 1.1rem; border-radius: 9999px; font-size: .8rem; font-weight: 600; opacity: 0; pointer-events: none; transition: all .25s; z-index: 200; }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -198,7 +189,6 @@
     #modal button { min-height: 48px; font-size: 1rem !important; border-radius: 12px !important; }
     #modal label { font-size: .85rem !important; }
     .swatch { width: 38px !important; height: 38px !important; }
-    #swatches label[title="직접 고르기"] { width: 38px !important; height: 38px !important; }
 
     body.signed-out #bottomBar, body.signed-out #modal, body.signed-out #menuSheet, body.signed-out #drawModal { display: none !important; }
     #bottomBar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; display: flex; gap: .6rem;
@@ -327,7 +317,7 @@
       </div>
 
       <div class="mb-3">
-        <label class="block text-xs font-bold text-slate-600 mb-1">색상 <span class="font-normal text-slate-400">(맨 끝 무지개 원: 원하는 색 직접 고르기)</span></label>
+        <label class="block text-xs font-bold text-slate-600 mb-1">색상</label>
         <div id="swatches" class="flex flex-wrap items-center gap-1.5 pt-1"></div>
       </div>
 
@@ -471,17 +461,60 @@
       return frag;
     }
 
+    /* ========== 색상: 아래 5가지 연한 색만 사용 ========== */
+    const COLOR_PRESETS = [
+      { id: '#FFE0E0', hex: '#FFE0E0', label: '연분홍' },
+      { id: '#FFFFD6', hex: '#FFFFD6', label: '연노랑' },
+      { id: '#E0FFE0', hex: '#E0FFE0', label: '연초록' },
+      { id: '#E0FFFF', hex: '#E0FFFF', label: '하늘색' },
+      { id: '#F0E0FF', hex: '#F0E0FF', label: '연보라' }
+    ];
+    const DEFAULT_COLOR = '#FFFFD6';
+    /* 예전에 저장된 색 이름(yellow 등)은 가장 비슷한 프리셋으로 바꿔서 표시합니다 */
+    const LEGACY_COLOR = {
+      yellow: '#FFFFD6', orange: '#FFFFD6', lime: '#FFFFD6', brown: '#FFFFD6', gray: '#FFFFD6',
+      pink: '#FFE0E0', red: '#FFE0E0',
+      green: '#E0FFE0',
+      blue: '#E0FFFF', sky: '#E0FFFF', teal: '#E0FFFF',
+      purple: '#F0E0FF'
+    };
+    function hexToRgb(hex) { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+    function normalizeColor(color) {
+      const s = String(color || '');
+      const exact = COLOR_PRESETS.find(p => p.hex.toLowerCase() === s.toLowerCase());
+      if (exact) return exact.hex;
+      if (LEGACY_COLOR[s]) return LEGACY_COLOR[s];
+      if (/^#[0-9a-fA-F]{6}$/.test(s)) { /* 예전에 직접 고른 색 → 가장 가까운 프리셋 */
+        const [r, g, b] = hexToRgb(s);
+        let best = DEFAULT_COLOR, bestD = Infinity;
+        COLOR_PRESETS.forEach(p => {
+          const [pr, pg, pb] = hexToRgb(p.hex);
+          const d = (r - pr) ** 2 + (g - pg) ** 2 + (b - pb) ** 2;
+          if (d < bestD) { bestD = d; best = p.hex; }
+        });
+        return best;
+      }
+      return DEFAULT_COLOR;
+    }
+    /* 검정 쪽으로 t만큼 어둡게 */
+    function shade(hex, t) {
+      const [r, g, b] = hexToRgb(hex);
+      const m = v => Math.round(v * (1 - t));
+      return `rgb(${m(r)},${m(g)},${m(b)})`;
+    }
+
     function buildCard(c) {
       const isOwner =
       !!window.fbCurrentUser &&
       c.ownerUid === window.fbCurrentUser.uid;
       const el = document.createElement('article');
-      const isHex = /^#[0-9a-fA-F]{6}$/.test(c.color);
-      el.className = `sticky-note ${isHex ? 'note-custom' : 'note-' + c.color} ${c.tilt}`;
-      if (isHex) {
-        el.style.background = `linear-gradient(135deg, ${mixWhite(c.color, 0.9)} 0%, ${mixWhite(c.color, 0.72)} 100%)`;
-        el.style.borderTopColor = c.color;
-      }
+      const color = normalizeColor(c.color);
+      el.className = `sticky-note note-custom ${c.tilt}`;
+      el.style.background = `linear-gradient(135deg, ${color} 0%, ${shade(color, 0.05)} 100%)`;
+      el.style.borderTopColor = shade(color, 0.14);
+      /* 💡 메모도 카드 색 계열의 연한색 */
+      el.style.setProperty('--memo-bg', shade(color, 0.06));
+      el.style.setProperty('--memo-border', shade(color, 0.32));
       c.body = c.body || ''; c.memo = c.memo || ''; c.warn = c.warn || '';
       el.dataset.category = c.category;
       el.dataset.customId = c.id;
@@ -549,7 +582,7 @@
       modalImages = card && Array.isArray(card.images) ? card.images.slice() : [];
       renderImgPreview();
       refreshCategorySelect(card ? card.category : (allCats()[0] || '__new__'));
-      setColorSelection(card ? card.color : 'yellow');
+      setColorSelection(card ? card.color : DEFAULT_COLOR);
       const rich = !!(card && card.html);
       document.getElementById('textFields').classList.toggle('hidden', rich);
       document.getElementById('aiBox').classList.toggle('hidden', rich);
@@ -634,56 +667,24 @@
       toast('삭제되었습니다');
     }
 
-    /* ========== 색상 선택 ========== */
-    const COLOR_PRESETS = [
-      { id: '#FFE0E0', hex: '#FFE0E0', label: '연분홍' },
-      { id: '#FFFFD6', hex: '#FFFFD6', label: '연노랑' },
-      { id: '#E0FFE0', hex: '#E0FFE0', label: '연초록' },
-      { id: '#E0FFFF', hex: '#E0FFFF', label: '하늘색' },
-      { id: '#F0E0FF', hex: '#F0E0FF', label: '연보라' }
-    ];
-    function mixWhite(hex, t) {
-      const n = parseInt(hex.slice(1), 16);
-      const m = v => Math.round(v + (255 - v) * t);
-      return `rgb(${m(n >> 16)},${m((n >> 8) & 255)},${m(n & 255)})`;
-    }
-
+    /* ========== 색상 선택 (프리셋 5개만) ========== */
     function renderSwatches() {
       const box = document.getElementById('swatches');
       box.innerHTML = COLOR_PRESETS.map((c, i) =>
-        `<label title="${c.label}"><input type="radio" name="newColor" value="${c.id}" class="hidden"${i === 0 ? ' checked' : ''}><span class="swatch" style="background:${c.hex}"></span></label>`
-      ).join('') +
-        `<label title="직접 고르기" class="relative inline-block" style="width:28px;height:28px">
-           <input type="radio" name="newColor" value="custom" class="hidden">
-           <span class="swatch" id="customSwatch" style="background:conic-gradient(#f44336,#ffeb3b,#4caf50,#00bcd4,#3f51b5,#e91e63,#f44336)"></span>
-           <input type="color" id="newColorCustom" value="#ff7aa2" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-         </label>`;
-      const picker = document.getElementById('newColorCustom');
-      const useCustom = () => {
-        document.querySelector('input[name="newColor"][value="custom"]').checked = true;
-        document.getElementById('customSwatch').style.background = picker.value;
-      };
-      picker.addEventListener('input', useCustom);
-      picker.addEventListener('change', useCustom);
+        `<label title="${c.label}"><input type="radio" name="newColor" value="${c.id}" class="hidden"${i === 1 ? ' checked' : ''}><span class="swatch" style="background:${c.hex}"></span></label>`
+      ).join('');
     }
 
     function setColorSelection(color) {
-      const customSwatch = document.getElementById('customSwatch');
-      customSwatch.style.background = 'conic-gradient(#f44336,#ffeb3b,#4caf50,#00bcd4,#3f51b5,#e91e63,#f44336)';
-      if (/^#[0-9a-fA-F]{6}$/.test(color)) {
-        document.getElementById('newColorCustom').value = color;
-        customSwatch.style.background = color;
-        document.querySelector('input[name="newColor"][value="custom"]').checked = true;
-      } else {
-        const r = document.querySelector(`input[name="newColor"][value="${color}"]`)
-               || document.querySelector('input[name="newColor"][value="yellow"]');
-        r.checked = true;
-      }
+      const id = normalizeColor(color);
+      const r = document.querySelector(`input[name="newColor"][value="${id}"]`)
+             || document.querySelector(`input[name="newColor"][value="${DEFAULT_COLOR}"]`);
+      r.checked = true;
     }
 
     function getSelectedColor() {
-      const v = document.querySelector('input[name="newColor"]:checked').value;
-      return v === 'custom' ? document.getElementById('newColorCustom').value : v;
+      const r = document.querySelector('input[name="newColor"]:checked');
+      return r ? r.value : DEFAULT_COLOR;
     }
 
     /* ========== 분야(카테고리) 관리 ========== */
