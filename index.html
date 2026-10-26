@@ -47,20 +47,11 @@
       border-color: transparent transparent rgba(0, 0, 0, 0.18) transparent;
       border-radius: 0 0 0 6px; pointer-events: none;
     }
-
-    .note-yellow { background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%); border-top: 28px solid #fbc02d; }
-    .note-blue   { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-top: 28px solid #1e88e5; }
-    .note-green  { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-top: 28px solid #43a047; }
-    .note-purple { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-top: 28px solid #8e24aa; }
-    .note-red    { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-top: 28px solid #e53935; }
-    .note-pink   { background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%); border-top: 28px solid #ec407a; }
-    .note-sky    { background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); border-top: 28px solid #29b6f6; }
-    .note-teal   { background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); border-top: 28px solid #00897b; }
-    .note-lime   { background: linear-gradient(135deg, #f9fbe7 0%, #f0f4c3 100%); border-top: 28px solid #afb42b; }
-    .note-brown  { background: linear-gradient(135deg, #efebe9 0%, #d7ccc8 100%); border-top: 28px solid #8d6e63; }
-    .note-gray   { background: linear-gradient(135deg, #eceff1 0%, #cfd8dc 100%); border-top: 28px solid #78909c; }
-    .note-custom { border-top: 28px solid #999; }
-    .note-orange { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-top: 28px solid #fb8c00; }
+    .note-red    { background: linear-gradient(135deg, #FFF3F3 0%, #FFD6D6 100%); border-top: 28px solid #FFB8B8; }
+    .note-yellow { background: linear-gradient(135deg, #FFFDE8 0%, #FFFAD0 100%); border-top: 28px solid #FFF9B8; }
+    .note-green  { background: linear-gradient(135deg, #F2FFF1 0%, #D9FFD6 100%); border-top: 28px solid #BEFFB8; }
+    .note-blue   { background: linear-gradient(135deg, #F1FEFF 0%, #D6FEFF 100%); border-top: 28px solid #B8FDFF; }
+    .note-purple { background: linear-gradient(135deg, #F6F1FF 0%, #E6D6FF 100%); border-top: 28px solid #D3B8FF; }
 
     .note-pin {
       position: absolute; top: -18px; left: 50%; width: 80px; height: 22px;
@@ -636,12 +627,11 @@
 
     /* ========== 색상 선택 ========== */
     const COLOR_PRESETS = [
-      { id: 'yellow', hex: '#fbc02d', label: '노랑' }, { id: 'orange', hex: '#fb8c00', label: '주황' },
-      { id: 'red', hex: '#e53935', label: '빨강' }, { id: 'pink', hex: '#ec407a', label: '분홍' },
-      { id: 'purple', hex: '#8e24aa', label: '보라' }, { id: 'blue', hex: '#1e88e5', label: '파랑' },
-      { id: 'sky', hex: '#29b6f6', label: '하늘' }, { id: 'teal', hex: '#00897b', label: '청록' },
-      { id: 'green', hex: '#43a047', label: '초록' }, { id: 'lime', hex: '#afb42b', label: '라임' },
-      { id: 'brown', hex: '#8d6e63', label: '갈색' }, { id: 'gray', hex: '#78909c', label: '회색' }
+      { id: 'red',    hex: '#FFB8B8', label: '연한 빨강' },
+      { id: 'yellow', hex: '#FFF9B8', label: '연한 노랑' },
+      { id: 'green',  hex: '#BEFFB8', label: '연한 초록' },
+      { id: 'blue',   hex: '#B8FDFF', label: '연한 파랑' },
+      { id: 'purple', hex: '#D3B8FF', label: '연한 보라' }
     ];
 
     function mixWhite(hex, t) {
