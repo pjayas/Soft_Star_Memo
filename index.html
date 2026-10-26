@@ -462,14 +462,17 @@
     }
 
     /* ========== 색상: 아래 5가지 연한 색만 사용 ========== */
+
     const COLOR_PRESETS = [
-      { id: '#FFE0E0', hex: '#FFE0E0', label: '연분홍' },
-      { id: '#FFFFD6', hex: '#FFFFD6', label: '연노랑' },
-      { id: '#E0FFE0', hex: '#E0FFE0', label: '연초록' },
-      { id: '#E0FFFF', hex: '#E0FFFF', label: '하늘색' },
-      { id: '#F0E0FF', hex: '#F0E0FF', label: '연보라' }
+      { id: '#FFCCCCFF', hex: '#FFCCCCFF', label: '연빨강' },
+      { id: '#FDFFCCFF', hex: '#FDFFCCFF', label: '연노랑' },
+      { id: '#CCFFCCFF', hex: '#CCFFCCFF', label: '연초록' },
+      { id: '#CCE5FFFF', hex: '#CCE5FFFF', label: '연파랑' },
+      { id: '#E5CCFFFF', hex: '#E5CCFFFF', label: '연보라' }
     ];
-    const DEFAULT_COLOR = '#FFFFD6';
+    
+    const DEFAULT_COLOR = '#FDFFCCFF';
+
     /* 예전에 저장된 색 이름(yellow 등)은 가장 비슷한 프리셋으로 바꿔서 표시합니다 */
     const LEGACY_COLOR = {
       yellow: '#FFFFD6', orange: '#FFFFD6', lime: '#FFFFD6', brown: '#FFFFD6', gray: '#FFFFD6',
@@ -478,13 +481,18 @@
       blue: '#E0FFFF', sky: '#E0FFFF', teal: '#E0FFFF',
       purple: '#F0E0FF'
     };
-    function hexToRgb(hex) { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+    function hexToRgb(hex) {
+      const s = String(hex || '').replace('#', '');
+      const rgb = s.length === 8 ? s.slice(0, 6) : s;
+      const n = parseInt(rgb, 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
     function normalizeColor(color) {
       const s = String(color || '');
       const exact = COLOR_PRESETS.find(p => p.hex.toLowerCase() === s.toLowerCase());
       if (exact) return exact.hex;
       if (LEGACY_COLOR[s]) return LEGACY_COLOR[s];
-      if (/^#[0-9a-fA-F]{6}$/.test(s)) { /* 예전에 직접 고른 색 → 가장 가까운 프리셋 */
+      if (/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(s))
         const [r, g, b] = hexToRgb(s);
         let best = DEFAULT_COLOR, bestD = Infinity;
         COLOR_PRESETS.forEach(p => {
@@ -668,11 +676,65 @@
     }
 
     /* ========== 색상 선택 (프리셋 5개만) ========== */
+
     function renderSwatches() {
       const box = document.getElementById('swatches');
-      box.innerHTML = COLOR_PRESETS.map((c, i) =>
-        `<label title="${c.label}"><input type="radio" name="newColor" value="${c.id}" class="hidden"${i === 1 ? ' checked' : ''}><span class="swatch" style="background:${c.hex}"></span></label>`
-      ).join('');
+    
+      box.innerHTML = COLOR_PRESETS.map((c, i) => `
+        <label title="${c.label}">
+          <input
+            type="radio"
+            name="newColor"
+            value="${c.id}"
+            class="hidden"
+            ${i === 1 ? 'checked' : ''}
+          >
+          <span class="swatch" style="background:${c.hex}"></span>
+        </label>
+      `).join('') + `
+        <label title="직접 색상 선택" class="relative inline-flex items-center justify-center">
+          <input
+            type="color"
+            id="customColorPicker"
+            value="#FDFFCC"
+            aria-label="직접 색상 선택"
+            style="position:absolute;width:38px;height:38px;opacity:0;cursor:pointer;z-index:2"
+          >
+          <span
+            class="swatch"
+            style="background:conic-gradient(red, yellow, lime, cyan, blue, magenta, red)"
+          ></span>
+        </label>
+      `;
+    
+      const picker = document.getElementById('customColorPicker');
+      picker.addEventListener('input', () => {
+        document.querySelectorAll('input[name="newColor"]').forEach(r => {
+          r.checked = false;
+        });
+        const color = picker.value.toUpperCase();
+        const existing = COLOR_PRESETS.find(c => c.hex.slice(0, 7) === color);
+    
+        if (existing) {
+          document.querySelector(
+            `input[name="newColor"][value="${existing.id}"]`
+          ).checked = true;
+        } else {
+          let custom = document.querySelector('#selectedCustomColor');
+          if (!custom) {
+            custom = document.createElement('input');
+            custom.type = 'radio';
+            custom.name = 'newColor';
+            custom.id = 'selectedCustomColor';
+            custom.className = 'hidden';
+            box.appendChild(custom);
+          }
+    
+          custom.value = color;
+          custom.checked = true;
+          picker.nextElementSibling.style.background = color;
+        }
+      });
     }
 
     function setColorSelection(color) {
@@ -686,6 +748,7 @@
       const r = document.querySelector('input[name="newColor"]:checked');
       return r ? r.value : DEFAULT_COLOR;
     }
+
 
     /* ========== 분야(카테고리) 관리 ========== */
     /* 분야 설정의 원본은 Firestore입니다. 변경은 트랜잭션(fbCatOp)으로 "변경 내용만" 적용하므로
