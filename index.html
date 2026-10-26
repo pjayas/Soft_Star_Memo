@@ -506,8 +506,11 @@
               : '시간 미등록')}
           </div>
         </div>
-        <button class="edit-btn" title="수정" onclick="editCard(this)">✎</button>
-        <button class="del-btn" title="삭제" onclick="deleteCard(this)">✕</button>
+        ${window.fbCurrentUser &&
+          c.ownerUid === window.fbCurrentUser.uid
+            ? `<button class="edit-btn" title="수정" onclick="editCard(this)">✎</button>
+               <button class="del-btn" title="삭제" onclick="deleteCard(this)">✕</button>`
+            : ''}  
         <details ${c.html ? '' : 'open'}>
           <summary><div>
             <span class="badge ${badgeClass(c.category)}">${esc(c.category)}</span>
@@ -609,22 +612,55 @@
       if (card) openModal(card);
     }
 
+
     function deleteCard(btn) {
       if (!requireReady()) return;
+    
       const card = btn.closest('.sticky-note');
-      const name = card.querySelector('h3').textContent;
-      if (!confirm(`"${name}" 포스트잇을 삭제할까요?`)) return;
-      if (card.dataset.customId) {
-        saveList(LS_CARDS, loadList(LS_CARDS).filter(c => c.id !== card.dataset.customId));
-      } else {
-        const hidden = loadList(LS_HIDDEN);
-        hidden.push(card.dataset.builtinId);
-        saveList(LS_HIDDEN, hidden);
+      const id = card.dataset.customId;
+    
+      // 기본 제공 카드와 사용자 작성 카드를 구분합니다.
+      if (id) {
+        const list = loadList(LS_CARDS);
+        const myCard = list.find(c => c.id === id);
+    
+        // 작성자 정보가 없거나 본인이 작성한 카드가 아니면 삭제를 거부합니다.
+        if (
+          !myCard ||
+          !window.fbCurrentUser ||
+          !myCard.ownerUid ||
+          myCard.ownerUid !== window.fbCurrentUser.uid
+        ) {
+          alert('본인이 작성한 포스트잇만 삭제할 수 있습니다.');
+          return;
+        }
       }
+    
+      const name = card.querySelector('h3').textContent;
+    
+      if (!confirm(`"${name}" 포스트잇을 삭제할까요?`)) return;
+    
+      if (id) {
+        const list = loadList(LS_CARDS);
+        saveList(LS_CARDS, list.filter(c => c.id !== id));
+      } else {
+        // 기본 제공 카드는 기존처럼 내 화면에서만 숨깁니다.
+        const hidden = loadList(LS_HIDDEN);
+        const builtinId = card.dataset.builtinId;
+    
+        if (!builtinId) return;
+    
+        if (!hidden.includes(builtinId)) {
+          hidden.push(builtinId);
+          saveList(LS_HIDDEN, hidden);
+        }
+      }
+    
       card.remove();
       applyFilters();
       toast('삭제되었습니다');
     }
+
 
     /* ========== 색상 선택 ========== */
     const COLOR_PRESETS = [
