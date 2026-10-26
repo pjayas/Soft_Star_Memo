@@ -472,6 +472,9 @@
     }
 
     function buildCard(c) {
+      const isOwner =
+      !!window.fbCurrentUser &&
+      c.ownerUid === window.fbCurrentUser.uid;
       const el = document.createElement('article');
       const isHex = /^#[0-9a-fA-F]{6}$/.test(c.color);
       el.className = `sticky-note ${isHex ? 'note-custom' : 'note-' + c.color} ${c.tilt}`;
@@ -506,8 +509,15 @@
               : '시간 미등록')}
           </div>
         </div>
-        <button class="edit-btn" title="수정" onclick="editCard(this)">✎</button>
-        <button class="del-btn" title="삭제" onclick="deleteCard(this)">✕</button>
+        ${isOwner
+          ? `<button class="edit-btn" title="수정"
+               onclick="editCard(this)">✎</button>`
+          : ''}
+        
+        ${isOwner
+          ? `<button class="del-btn" title="삭제"
+               onclick="deleteCard(this)">✕</button>`
+          : ''}
         <details ${c.html ? '' : 'open'}>
           <summary><div>
             <span class="badge ${badgeClass(c.category)}">${esc(c.category)}</span>
