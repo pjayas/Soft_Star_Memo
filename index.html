@@ -54,6 +54,10 @@
     .note-purple { background: linear-gradient(135deg, #EDE3FB 0%, #D6C0F5 100%); border-top: 28px solid #BC9BEB; }
     .note-orange { background: linear-gradient(135deg, #FFF1E3 0%, #FFD9B8 100%); border-top: 28px solid #FFC48F; }
 
+    .tbl-edit { border-collapse: collapse; }
+    .tbl-edit td { padding: 2px; }
+    .tbl-cell { width: 100%; min-width: 96px; border: 1px solid #cbd5e1; border-radius: 8px; padding: .4rem .5rem; font-size: 16px; background: #fff; }
+    .tbl-cell.head { background: #f1f5f9; font-weight: 700; }
     .user-table { overflow-x: auto; margin: .6rem 0; }
     .user-table table { width: 100%; border-collapse: collapse; font-size: .92em; background: rgba(255,255,255,.5); }
     .user-table th, .user-table td { border: 1px solid rgba(100,100,100,.45); padding: 6px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
@@ -337,9 +341,14 @@
       <button type="button" onclick="document.getElementById('newImages').click()" class="w-full mb-2 px-3 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300">📷 이미지 추가</button>
       <div id="imgPreview" class="flex flex-wrap gap-3 mb-3"></div>
 
-      <label class="block text-xs font-bold text-slate-600 mb-1">📊 표 <span class="font-normal text-slate-400">(한 줄 = 한 행, 칸은 | 또는 탭으로 구분, 첫 줄 = 제목행)</span></label>
-      <button type="button" onclick="insertTableTemplate()" class="w-full mb-2 px-3 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300">＋ 3×3 표 틀 넣기</button>
-      <textarea id="newTable" rows="4" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400" placeholder="구분 | 미토콘드리아 | 엽록체&#10;막 구조 | 2중막 | 2중막&#10;기능 | 세포호흡 | 광합성"></textarea>
+      <label class="block text-xs font-bold text-slate-600 mb-1">📊 표 <span class="font-normal text-slate-400">(행·열 수를 고르면 칸이 생겨요 · 첫 줄은 제목행)</span></label>
+      <div class="flex items-center gap-2 mb-2">
+        <select id="tblRows" onchange="tblResize()" class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg"></select>
+        <span class="text-sm text-slate-500">×</span>
+        <select id="tblCols" onchange="tblResize()" class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg"></select>
+      </div>
+      <div id="tblEditor" class="overflow-x-auto mb-1"></div>
+      <p class="text-xs text-slate-400 mb-3">엑셀·구글시트에서 복사한 표를 칸에 붙여넣으면 자동으로 채워져요.</p>
 
       <label class="block text-xs font-bold text-slate-600 mb-1">💡 암기 팁 (선택)</label>
       <input id="newMemo" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg" placeholder="두문자, 연상법 등">
@@ -480,11 +489,52 @@
       return `<div class="user-table"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead>` +
         (rest.length ? `<tbody>${rest.map(r => `<tr>${r.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody>` : '') + `</table></div>`;
     }
-    function insertTableTemplate() {
-      const el = document.getElementById('newTable');
-      if (el.value.trim() && !confirm('입력해 둔 표가 틀로 바뀝니다. 계속할까요?')) return;
-      el.value = '구분 | 항목 A | 항목 B\n특징 |  | \n기능 |  | ';
-      el.focus();
+    /* ----- 표 편집기: 행·열을 고르면 입력칸이 생기고, 저장은 탭/줄바꿈 문자열로 합니다 ----- */
+    const TBL_R = 20, TBL_C = 8;
+    let tblData = [];
+    function tblInit() {
+      const r = document.getElementById('tblRows'), c = document.getElementById('tblCols');
+      r.innerHTML = '<option value="0">표 없음</option>' + Array.from({ length: TBL_R }, (_, i) => `<option value="${i + 1}">${i + 1}행</option>`).join('');
+      c.innerHTML = Array.from({ length: TBL_C }, (_, i) => `<option value="${i + 1}"${i === 2 ? ' selected' : ''}>${i + 1}열</option>`).join('');
+      tblRender();
+    }
+    function tblResize() {
+      const r = +document.getElementById('tblRows').value, c = +document.getElementById('tblCols').value;
+      tblData = Array.from({ length: r }, (_, i) => Array.from({ length: c }, (_, j) => (tblData[i] && tblData[i][j]) || ''));
+      tblRender();
+    }
+    function tblSync() {
+      document.getElementById('tblRows').value = tblData.length;
+      if (tblData.length) document.getElementById('tblCols').value = tblData[0].length;
+      tblRender();
+    }
+    function tblLoad(str) {
+      const rows = String(str || '').split('\n').map(r => r.replace(/\r/g, '')).filter(r => r.trim());
+      const d = rows.map(r => (r.includes('\t') ? r.split('\t') : r.trim().replace(/^\||\|$/g, '').split('|')).map(s => s.trim()));
+      const cols = Math.min(TBL_C, Math.max(1, ...d.map(a => a.length)));
+      tblData = d.slice(0, TBL_R).map(a => { a = a.slice(0, cols); while (a.length < cols) a.push(''); return a; });
+      tblSync();
+    }
+    function tblToString() {
+      return tblData.map(r => r.map(v => String(v).replace(/[\t\n\r]/g, ' ').trim()).join('\t')).join('\n');
+    }
+    function tblRender() {
+      const box = document.getElementById('tblEditor');
+      if (!tblData.length) { box.innerHTML = '<p class="text-xs text-slate-400">위에서 행 수를 고르면 표가 만들어져요.</p>'; return; }
+      box.innerHTML = '<table class="tbl-edit">' + tblData.map((r, i) => '<tr>' + r.map((v, j) =>
+        `<td><input class="tbl-cell${i === 0 ? ' head' : ''}" value="${esc(v)}" placeholder="${i === 0 ? '제목' : ''}" oninput="tblData[${i}][${j}]=this.value" onpaste="tblPaste(event,${i},${j})"></td>`).join('') + '</tr>').join('') + '</table>';
+    }
+    function tblPaste(e, r0, c0) {
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\r/g, '').replace(/\n$/, '');
+      if (!/[\t\n]/.test(text)) return;
+      e.preventDefault();
+      const rows = text.split('\n').map(l => l.split('\t'));
+      const needR = Math.min(TBL_R, r0 + rows.length);
+      const cols = Math.min(TBL_C, Math.max(tblData[0].length, c0 + Math.max(...rows.map(a => a.length))));
+      while (tblData.length < needR) tblData.push([]);
+      tblData.forEach(a => { while (a.length < cols) a.push(''); });
+      rows.forEach((a, i) => a.forEach((v, j) => { if (r0 + i < TBL_R && c0 + j < TBL_C) tblData[r0 + i][c0 + j] = v.trim(); }));
+      tblSync();
     }
 
     function buildCard(c) {
@@ -563,7 +613,7 @@
       document.getElementById('newBody').value = card ? (card.body || '') : '';
       document.getElementById('newMemo').value = card ? (card.memo || '') : '';
       document.getElementById('newWarn').value = card ? (card.warn || '') : '';
-      document.getElementById('newTable').value = card ? (card.table || '') : '';
+      tblLoad(card ? card.table : '');
       modalImages = card && Array.isArray(card.images) ? card.images.slice() : [];
       renderImgPreview();
       refreshCategorySelect(card ? card.category : (allCats()[0] || '__new__'));
@@ -595,7 +645,7 @@
       const data = {
         title, category, color: getSelectedColor(),
         body: document.getElementById('newBody').value,
-        table: document.getElementById('newTable').value,
+        table: tblToString(),
         memo: document.getElementById('newMemo').value.trim(),
         warn: document.getElementById('newWarn').value.trim(),
         images: modalImages.slice()
@@ -1038,6 +1088,7 @@
         card.insertBefore(b, card.querySelector('details'));
       });
       /* 로그인 전에는 캐시된 포스트잇을 그리지 않습니다. Firestore에서 받은 뒤에만 표시합니다. */
+      tblInit();
       renderSwatches();
       renderCatButtons();
       refreshCategorySelect();
