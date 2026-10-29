@@ -47,11 +47,17 @@
       border-color: transparent transparent rgba(0, 0, 0, 0.18) transparent;
       border-radius: 0 0 0 6px; pointer-events: none;
     }
-    .note-red    { background: linear-gradient(135deg, #FFF3F3 0%, #FFD6D6 100%); border-top: 28px solid #FFB8B8; }
-    .note-yellow { background: linear-gradient(135deg, #FFFDE8 0%, #FFFAD0 100%); border-top: 28px solid #FFF9B8; }
-    .note-green  { background: linear-gradient(135deg, #F2FFF1 0%, #D9FFD6 100%); border-top: 28px solid #BEFFB8; }
-    .note-blue   { background: linear-gradient(135deg, #F1FEFF 0%, #D6FEFF 100%); border-top: 28px solid #B8FDFF; }
-    .note-purple { background: linear-gradient(135deg, #F6F1FF 0%, #E6D6FF 100%); border-top: 28px solid #D3B8FF; }
+    .note-red    { background: linear-gradient(135deg, #FFE6E6 0%, #FFC4C4 100%); border-top: 28px solid #F5A3A3; }
+    .note-yellow { background: linear-gradient(135deg, #FFF9D0 0%, #FFF2B0 100%); border-top: 28px solid #F2E590; }
+    .note-green  { background: linear-gradient(135deg, #E6FBE3 0%, #C4F2BE 100%); border-top: 28px solid #A3EB9C; }
+    .note-blue   { background: linear-gradient(135deg, #E3F9FB 0%, #BFEFF2 100%); border-top: 28px solid #9DE6EA; }
+    .note-purple { background: linear-gradient(135deg, #EDE3FB 0%, #D6C0F5 100%); border-top: 28px solid #BC9BEB; }
+    .note-orange { background: linear-gradient(135deg, #FFF1E3 0%, #FFD9B8 100%); border-top: 28px solid #FFC48F; }
+
+    .user-table { overflow-x: auto; margin: .6rem 0; }
+    .user-table table { width: 100%; border-collapse: collapse; font-size: .92em; background: rgba(255,255,255,.5); }
+    .user-table th, .user-table td { border: 1px solid rgba(100,100,100,.45); padding: 6px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+    .user-table th { background: rgba(0,0,0,.08); font-weight: 700; }
 
     .note-pin {
       position: absolute; top: -18px; left: 50%; width: 80px; height: 22px;
@@ -331,6 +337,10 @@
       <button type="button" onclick="document.getElementById('newImages').click()" class="w-full mb-2 px-3 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300">📷 이미지 추가</button>
       <div id="imgPreview" class="flex flex-wrap gap-3 mb-3"></div>
 
+      <label class="block text-xs font-bold text-slate-600 mb-1">📊 표 <span class="font-normal text-slate-400">(한 줄 = 한 행, 칸은 | 또는 탭으로 구분, 첫 줄 = 제목행)</span></label>
+      <button type="button" onclick="insertTableTemplate()" class="w-full mb-2 px-3 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300">＋ 3×3 표 틀 넣기</button>
+      <textarea id="newTable" rows="4" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400" placeholder="구분 | 미토콘드리아 | 엽록체&#10;막 구조 | 2중막 | 2중막&#10;기능 | 세포호흡 | 광합성"></textarea>
+
       <label class="block text-xs font-bold text-slate-600 mb-1">💡 암기 팁 (선택)</label>
       <input id="newMemo" class="w-full mb-3 px-3 py-2 text-sm border border-slate-300 rounded-lg" placeholder="두문자, 연상법 등">
 
@@ -462,6 +472,21 @@
       return frag;
     }
 
+    function tableHtml(text) {
+      const rows = String(text || '').split('\n').map(r => r.replace(/\r/g, '')).filter(r => r.trim());
+      if (!rows.length) return '';
+      const cells = rows.map(r => (r.includes('\t') ? r.split('\t') : r.trim().replace(/^\||\|$/g, '').split('|')).map(s => esc(s.trim())));
+      const head = cells[0], rest = cells.slice(1);
+      return `<div class="user-table"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead>` +
+        (rest.length ? `<tbody>${rest.map(r => `<tr>${r.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody>` : '') + `</table></div>`;
+    }
+    function insertTableTemplate() {
+      const el = document.getElementById('newTable');
+      if (el.value.trim() && !confirm('입력해 둔 표가 틀로 바뀝니다. 계속할까요?')) return;
+      el.value = '구분 | 항목 A | 항목 B\n특징 |  | \n기능 |  | ';
+      el.focus();
+    }
+
     function buildCard(c) {
       const isOwner =
       !!window.fbCurrentUser &&
@@ -470,13 +495,13 @@
       const isHex = /^#[0-9a-fA-F]{6}$/.test(c.color);
       el.className = `sticky-note ${isHex ? 'note-custom' : 'note-' + c.color} ${c.tilt}`;
       if (isHex) {
-        el.style.background = `linear-gradient(135deg, ${mixWhite(c.color, 0.9)} 0%, ${mixWhite(c.color, 0.72)} 100%)`;
+        el.style.background = `linear-gradient(135deg, ${mixWhite(c.color, 0.85)} 0%, ${mixWhite(c.color, 0.64)} 100%)`;
         el.style.borderTopColor = c.color;
       }
-      c.body = c.body || ''; c.memo = c.memo || ''; c.warn = c.warn || '';
+      c.body = c.body || ''; c.memo = c.memo || ''; c.warn = c.warn || ''; c.table = c.table || '';
       el.dataset.category = c.category;
       el.dataset.customId = c.id;
-      el.dataset.keywords = (c.title + ' ' + c.body + ' ' + c.memo + ' ' + c.warn).toLowerCase();
+      el.dataset.keywords = (c.title + ' ' + c.body + ' ' + c.table + ' ' + c.memo + ' ' + c.warn).toLowerCase();
       const items = c.body.split('\n').map(s => s.trim()).filter(Boolean).map(s => `<li>${esc(s)}</li>`).join('');
       const imgHtml = (Array.isArray(c.images) ? c.images : [])
         .filter(src => /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(src))
@@ -515,6 +540,7 @@
           <div class="card-content${c.html ? ' rich-content' : ''}">
             ${items ? `<ul class="list-disc pl-4 space-y-1 text-slate-700">${items}</ul>` : ''}
             ${imgHtml ? `<div class="card-imgs">${imgHtml}</div>` : ''}
+            ${c.table ? tableHtml(c.table) : ''}
             ${c.memo ? `<div class="memory">💡 ${esc(c.memo)}</div>` : ''}
             ${c.warn ? `<div class="warning">⚠️ ${esc(c.warn)}</div>` : ''}
           </div>
@@ -537,6 +563,7 @@
       document.getElementById('newBody').value = card ? (card.body || '') : '';
       document.getElementById('newMemo').value = card ? (card.memo || '') : '';
       document.getElementById('newWarn').value = card ? (card.warn || '') : '';
+      document.getElementById('newTable').value = card ? (card.table || '') : '';
       modalImages = card && Array.isArray(card.images) ? card.images.slice() : [];
       renderImgPreview();
       refreshCategorySelect(card ? card.category : (allCats()[0] || '__new__'));
@@ -568,6 +595,7 @@
       const data = {
         title, category, color: getSelectedColor(),
         body: document.getElementById('newBody').value,
+        table: document.getElementById('newTable').value,
         memo: document.getElementById('newMemo').value.trim(),
         warn: document.getElementById('newWarn').value.trim(),
         images: modalImages.slice()
@@ -627,11 +655,12 @@
 
     /* ========== 색상 선택 ========== */
     const COLOR_PRESETS = [
-      { id: 'red',    hex: '#FFB8B8', label: '연한 빨강' },
-      { id: 'yellow', hex: '#FFF9B8', label: '연한 노랑' },
-      { id: 'green',  hex: '#BEFFB8', label: '연한 초록' },
-      { id: 'blue',   hex: '#B8FDFF', label: '연한 파랑' },
-      { id: 'purple', hex: '#D3B8FF', label: '연한 보라' }
+      { id: 'red',    hex: '#F5A3A3', label: '연한 빨강' },
+      { id: 'yellow', hex: '#F2E590', label: '연한 노랑' },
+      { id: 'green',  hex: '#A3EB9C', label: '연한 초록' },
+      { id: 'blue',   hex: '#9DE6EA', label: '연한 파랑' },
+      { id: 'purple', hex: '#BC9BEB', label: '연한 보라' },
+      { id: 'orange', hex: '#FFC48F', label: '연한 주황' }
     ];
 
     function mixWhite(hex, t) {
