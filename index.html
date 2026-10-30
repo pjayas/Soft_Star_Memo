@@ -56,7 +56,9 @@
 
     .tbl-edit { border-collapse: collapse; }
     .tbl-edit td { padding: 2px; }
-    .tbl-cell { width: 100%; min-width: 96px; border: 1px solid #cbd5e1; border-radius: 8px; padding: .4rem .5rem; font-size: 16px; background: #fff; }
+    .tbl-cell { display: block; width: 100%; min-width: 96px; border: 1px solid #cbd5e1; border-radius: 8px; padding: .4rem .5rem; font-size: 16px; line-height: 1.4; background: #fff; resize: none; overflow: hidden; }
+    #modal textarea.tbl-cell { min-height: 44px; }
+    .tbl-block { border: 1px solid #e2e8f0; border-radius: 12px; padding: .6rem; margin-bottom: .6rem; background: #f8fafc; }
     .tbl-cell.head { background: #f1f5f9; font-weight: 700; }
     .user-table { overflow-x: auto; margin: .6rem 0; }
     .user-table table { width: 100%; border-collapse: collapse; font-size: .92em; background: rgba(255,255,255,.5); }
@@ -341,13 +343,9 @@
       <button type="button" onclick="document.getElementById('newImages').click()" class="w-full mb-2 px-3 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300">📷 이미지 추가</button>
       <div id="imgPreview" class="flex flex-wrap gap-3 mb-3"></div>
 
-      <label class="block text-xs font-bold text-slate-600 mb-1">📊 표 <span class="font-normal text-slate-400">(행·열 수를 고르면 칸이 생겨요 · 첫 줄은 제목행)</span></label>
-      <div class="flex items-center gap-2 mb-2">
-        <select id="tblRows" onchange="tblResize()" class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg"></select>
-        <span class="text-sm text-slate-500">×</span>
-        <select id="tblCols" onchange="tblResize()" class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg"></select>
-      </div>
-      <div id="tblEditor" class="overflow-x-auto mb-1"></div>
+      <label class="block text-xs font-bold text-slate-600 mb-1">📊 표 <span class="font-normal text-slate-400">(여러 개 추가 가능 · 칸 안에서 엔터로 줄바꿈 · 첫 줄은 제목행)</span></label>
+      <div id="tblEditor" class="mb-2"></div>
+      <button type="button" onclick="tblAdd()" class="w-full mb-1 px-3 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300">＋ 표 추가</button>
       <p class="text-xs text-slate-400 mb-3">엑셀·구글시트에서 복사한 표를 칸에 붙여넣으면 자동으로 채워져요.</p>
 
       <label class="block text-xs font-bold text-slate-600 mb-1">💡 암기 팁 (선택)</label>
@@ -481,60 +479,85 @@
       return frag;
     }
 
-    function tableHtml(text) {
-      const rows = String(text || '').split('\n').map(r => r.replace(/\r/g, '')).filter(r => r.trim());
-      if (!rows.length) return '';
-      const cells = rows.map(r => (r.includes('\t') ? r.split('\t') : r.trim().replace(/^\||\|$/g, '').split('|')).map(s => esc(s.trim())));
-      const head = cells[0], rest = cells.slice(1);
-      return `<div class="user-table"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead>` +
-        (rest.length ? `<tbody>${rest.map(r => `<tr>${r.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody>` : '') + `</table></div>`;
+    /* ----- 표: 여러 개 지원. 카드의 tables 필드에 JSON 문자열로 저장 (예전 table 필드도 읽어줍니다) ----- */
+    const TBL_R = 20, TBL_C = 8, TBL_N = 10;
+    let tblList = [];
+    function tblNorm(t) {
+      const rows = (Array.isArray(t) ? t : []).filter(Array.isArray).slice(0, TBL_R);
+      if (!rows.length) return [];
+      const cols = Math.min(TBL_C, Math.max(1, ...rows.map(r => r.length)));
+      return rows.map(r => Array.from({ length: cols }, (_, j) => String(r[j] == null ? '' : r[j])));
     }
-    /* ----- 표 편집기: 행·열을 고르면 입력칸이 생기고, 저장은 탭/줄바꿈 문자열로 합니다 ----- */
-    const TBL_R = 20, TBL_C = 8;
-    let tblData = [];
-    function tblInit() {
-      const r = document.getElementById('tblRows'), c = document.getElementById('tblCols');
-      r.innerHTML = '<option value="0">표 없음</option>' + Array.from({ length: TBL_R }, (_, i) => `<option value="${i + 1}">${i + 1}행</option>`).join('');
-      c.innerHTML = Array.from({ length: TBL_C }, (_, i) => `<option value="${i + 1}"${i === 2 ? ' selected' : ''}>${i + 1}열</option>`).join('');
-      tblRender();
-    }
-    function tblResize() {
-      const r = +document.getElementById('tblRows').value, c = +document.getElementById('tblCols').value;
-      tblData = Array.from({ length: r }, (_, i) => Array.from({ length: c }, (_, j) => (tblData[i] && tblData[i][j]) || ''));
-      tblRender();
-    }
-    function tblSync() {
-      document.getElementById('tblRows').value = tblData.length;
-      if (tblData.length) document.getElementById('tblCols').value = tblData[0].length;
-      tblRender();
-    }
-    function tblLoad(str) {
+    function tblParseOld(str) {
       const rows = String(str || '').split('\n').map(r => r.replace(/\r/g, '')).filter(r => r.trim());
-      const d = rows.map(r => (r.includes('\t') ? r.split('\t') : r.trim().replace(/^\||\|$/g, '').split('|')).map(s => s.trim()));
-      const cols = Math.min(TBL_C, Math.max(1, ...d.map(a => a.length)));
-      tblData = d.slice(0, TBL_R).map(a => { a = a.slice(0, cols); while (a.length < cols) a.push(''); return a; });
-      tblSync();
+      return tblNorm(rows.map(r => (r.includes('\t') ? r.split('\t') : r.trim().replace(/^\||\|$/g, '').split('|')).map(s => s.trim())));
     }
+    function cardTables(c) {
+      let list = [];
+      if (c.tables) { try { list = JSON.parse(c.tables); } catch (e) { list = []; } }
+      else if (c.table) list = [tblParseOld(c.table)];
+      return (Array.isArray(list) ? list : []).map(tblNorm).filter(t => t.length);
+    }
+    function tableHtml(rows) {
+      rows = tblNorm(rows);
+      if (!rows.length) return '';
+      const cell = v => esc(v).replace(/\n/g, '<br>');
+      const body = rows.slice(1);
+      return `<div class="user-table"><table><thead><tr>${rows[0].map(h => `<th>${cell(h)}</th>`).join('')}</tr></thead>` +
+        (body.length ? `<tbody>${body.map(r => `<tr>${r.map(x => `<td>${cell(x)}</td>`).join('')}</tr>`).join('')}</tbody>` : '') + `</table></div>`;
+    }
+    function tablesHtml(c) { return cardTables(c).map(tableHtml).join(''); }
+
+    function tblLoad(card) { tblList = card ? cardTables(card) : []; tblRender(); }
     function tblToString() {
-      return tblData.map(r => r.map(v => String(v).replace(/[\t\n\r]/g, ' ').trim()).join('\t')).join('\n');
+      const list = tblList.map(t => t.map(r => r.map(v => String(v).trim()))).filter(t => t.some(r => r.some(Boolean)));
+      return list.length ? JSON.stringify(list) : '';
     }
+    function tblAdd() {
+      if (tblList.length >= TBL_N) { toast('표는 최대 ' + TBL_N + '개까지 넣을 수 있어요.'); return; }
+      tblList.push(Array.from({ length: 3 }, () => ['', '', '']));
+      tblRender();
+    }
+    function tblRemove(i) {
+      if (!confirm('표 ' + (i + 1) + '을(를) 삭제할까요?')) return;
+      tblList.splice(i, 1); tblRender();
+    }
+    function tblResize(i) {
+      const r = +document.getElementById('tblR' + i).value, c = +document.getElementById('tblC' + i).value, old = tblList[i];
+      tblList[i] = Array.from({ length: r }, (_, a) => Array.from({ length: c }, (_, b) => (old[a] && old[a][b]) || ''));
+      tblRender();
+    }
+    function tblGrow(el) { el.style.height = 'auto'; if (el.scrollHeight) el.style.height = el.scrollHeight + 'px'; }
     function tblRender() {
       const box = document.getElementById('tblEditor');
-      if (!tblData.length) { box.innerHTML = '<p class="text-xs text-slate-400">위에서 행 수를 고르면 표가 만들어져요.</p>'; return; }
-      box.innerHTML = '<table class="tbl-edit">' + tblData.map((r, i) => '<tr>' + r.map((v, j) =>
-        `<td><input class="tbl-cell${i === 0 ? ' head' : ''}" value="${esc(v)}" placeholder="${i === 0 ? '제목' : ''}" oninput="tblData[${i}][${j}]=this.value" onpaste="tblPaste(event,${i},${j})"></td>`).join('') + '</tr>').join('') + '</table>';
+      if (!tblList.length) { box.innerHTML = '<p class="text-xs text-slate-400 mb-1">아직 표가 없어요. 아래 버튼으로 추가하세요.</p>'; return; }
+      const opts = (n, u) => Array.from({ length: n }, (_, k) => `<option value="${k + 1}">${k + 1}${u}</option>`).join('');
+      box.innerHTML = tblList.map((t, i) => `
+        <div class="tbl-block">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-bold text-slate-600 whitespace-nowrap">표 ${i + 1}</span>
+            <select id="tblR${i}" onchange="tblResize(${i})" class="flex-1 px-2 py-2 text-sm border border-slate-300 rounded-lg">${opts(TBL_R, '행')}</select>
+            <span class="text-sm text-slate-500">×</span>
+            <select id="tblC${i}" onchange="tblResize(${i})" class="flex-1 px-2 py-2 text-sm border border-slate-300 rounded-lg">${opts(TBL_C, '열')}</select>
+            <button type="button" onclick="tblRemove(${i})" title="표 삭제" class="px-3 text-sm bg-red-50 text-red-700 border border-red-200 rounded-lg">🗑</button>
+          </div>
+          <div class="overflow-x-auto"><table class="tbl-edit">${t.map((r, a) => '<tr>' + r.map((v, b) =>
+            `<td><textarea rows="1" class="tbl-cell${a === 0 ? ' head' : ''}" placeholder="${a === 0 ? '제목' : ''}" oninput="tblList[${i}][${a}][${b}]=this.value;tblGrow(this)" onpaste="tblPaste(event,${i},${a},${b})">\n${esc(v)}</textarea></td>`).join('') + '</tr>').join('')}</table></div>
+        </div>`).join('');
+      tblList.forEach((t, i) => { document.getElementById('tblR' + i).value = t.length; document.getElementById('tblC' + i).value = t[0].length; });
+      box.querySelectorAll('textarea').forEach(tblGrow);
     }
-    function tblPaste(e, r0, c0) {
+    function tblPaste(e, i, r0, c0) {
       const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\r/g, '').replace(/\n$/, '');
-      if (!/[\t\n]/.test(text)) return;
+      if (!text.includes('\t')) return; /* 탭이 없으면 일반 붙여넣기(칸 안 줄바꿈) */
       e.preventDefault();
-      const rows = text.split('\n').map(l => l.split('\t'));
-      const needR = Math.min(TBL_R, r0 + rows.length);
-      const cols = Math.min(TBL_C, Math.max(tblData[0].length, c0 + Math.max(...rows.map(a => a.length))));
-      while (tblData.length < needR) tblData.push([]);
-      tblData.forEach(a => { while (a.length < cols) a.push(''); });
-      rows.forEach((a, i) => a.forEach((v, j) => { if (r0 + i < TBL_R && c0 + j < TBL_C) tblData[r0 + i][c0 + j] = v.trim(); }));
-      tblSync();
+      const rows = text.split('\n').map(l => l.split('\t')), t = tblList[i];
+      const needR = Math.min(TBL_R, Math.max(t.length, r0 + rows.length));
+      const cols = Math.min(TBL_C, Math.max(t[0].length, c0 + Math.max(...rows.map(a => a.length))));
+      while (t.length < needR) t.push([]);
+      t.forEach(a => { while (a.length < cols) a.push(''); });
+      rows.forEach((a, x) => a.forEach((v, y) => { if (r0 + x < TBL_R && c0 + y < TBL_C) t[r0 + x][c0 + y] = v.trim(); }));
+      tblRender();
     }
 
     function buildCard(c) {
@@ -548,10 +571,10 @@
         el.style.background = `linear-gradient(135deg, ${mixWhite(c.color, 0.85)} 0%, ${mixWhite(c.color, 0.64)} 100%)`;
         el.style.borderTopColor = c.color;
       }
-      c.body = c.body || ''; c.memo = c.memo || ''; c.warn = c.warn || ''; c.table = c.table || '';
+      c.body = c.body || ''; c.memo = c.memo || ''; c.warn = c.warn || ''; c.table = c.table || ''; c.tables = c.tables || '';
       el.dataset.category = c.category;
       el.dataset.customId = c.id;
-      el.dataset.keywords = (c.title + ' ' + c.body + ' ' + c.table + ' ' + c.memo + ' ' + c.warn).toLowerCase();
+      el.dataset.keywords = (c.title + ' ' + c.body + ' ' + c.table + ' ' + c.tables + ' ' + c.memo + ' ' + c.warn).toLowerCase();
       const items = c.body.split('\n').map(s => s.trim()).filter(Boolean).map(s => `<li>${esc(s)}</li>`).join('');
       const imgHtml = (Array.isArray(c.images) ? c.images : [])
         .filter(src => /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(src))
@@ -590,7 +613,7 @@
           <div class="card-content${c.html ? ' rich-content' : ''}">
             ${items ? `<ul class="list-disc pl-4 space-y-1 text-slate-700">${items}</ul>` : ''}
             ${imgHtml ? `<div class="card-imgs">${imgHtml}</div>` : ''}
-            ${c.table ? tableHtml(c.table) : ''}
+            ${tablesHtml(c)}
             ${c.memo ? `<div class="memory">💡 ${esc(c.memo)}</div>` : ''}
             ${c.warn ? `<div class="warning">⚠️ ${esc(c.warn)}</div>` : ''}
           </div>
@@ -613,7 +636,7 @@
       document.getElementById('newBody').value = card ? (card.body || '') : '';
       document.getElementById('newMemo').value = card ? (card.memo || '') : '';
       document.getElementById('newWarn').value = card ? (card.warn || '') : '';
-      tblLoad(card ? card.table : '');
+      tblLoad(card);
       modalImages = card && Array.isArray(card.images) ? card.images.slice() : [];
       renderImgPreview();
       refreshCategorySelect(card ? card.category : (allCats()[0] || '__new__'));
@@ -623,6 +646,7 @@
       document.getElementById('aiBox').classList.toggle('hidden', rich);
       document.getElementById('richNote').classList.toggle('hidden', !rich);
       document.getElementById('modal').classList.add('show');
+      tblRender();
       document.getElementById('newTitle').focus();
     }
     function closeModal() {
@@ -645,7 +669,8 @@
       const data = {
         title, category, color: getSelectedColor(),
         body: document.getElementById('newBody').value,
-        table: tblToString(),
+        tables: tblToString(),
+        table: '',
         memo: document.getElementById('newMemo').value.trim(),
         warn: document.getElementById('newWarn').value.trim(),
         images: modalImages.slice()
@@ -1088,7 +1113,6 @@
         card.insertBefore(b, card.querySelector('details'));
       });
       /* 로그인 전에는 캐시된 포스트잇을 그리지 않습니다. Firestore에서 받은 뒤에만 표시합니다. */
-      tblInit();
       renderSwatches();
       renderCatButtons();
       refreshCategorySelect();
