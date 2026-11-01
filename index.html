@@ -501,20 +501,36 @@
         .map(x => Array.isArray(x) ? { title: '', rows: tblNorm(x) } : { title: String((x && x.title) || '').slice(0, 60), rows: tblNorm(x && x.rows) })
         .filter(x => x.rows.length);
     }
+    /* 완전히 빈 행·열은 빼고, 첫 줄(제목행)이 비어 있으면 제목행 색(회색) 없이 표시합니다 */
+    function tblTrim(rows) {
+      const has = v => String(v).trim() !== '';
+      const hasHeader = rows.length > 0 && rows[0].some(has);
+      let rr = rows.filter(r => r.some(has));
+      if (!rr.length) return { rows: [], hasHeader: false };
+      const keepC = rr[0].map((_, j) => rr.some(r => has(r[j])));
+      return { rows: rr.map(r => r.filter((_, j) => keepC[j])), hasHeader };
+    }
     function tableHtml(tb) {
-      const rows = tb.rows;
+      const { rows, hasHeader } = tblTrim(tb.rows);
+      if (!rows.length) return '';
       const cell = v => esc(v).replace(/\n/g, '<br>');
-      const body = rows.slice(1);
+      const tr = (r, tag) => `<tr>${r.map(x => `<${tag}>${cell(x)}</${tag}>`).join('')}</tr>`;
+      const body = hasHeader ? rows.slice(1) : rows;
       return (tb.title ? `<div class="user-table-title">📊 ${esc(tb.title)}</div>` : '') +
-        `<div class="user-table"><table><thead><tr>${rows[0].map(h => `<th>${cell(h)}</th>`).join('')}</tr></thead>` +
-        (body.length ? `<tbody>${body.map(r => `<tr>${r.map(x => `<td>${cell(x)}</td>`).join('')}</tr>`).join('')}</tbody>` : '') + `</table></div>`;
+        `<div class="user-table"><table>${hasHeader ? `<thead>${tr(rows[0], 'th')}</thead>` : ''}` +
+        (body.length ? `<tbody>${body.map(r => tr(r, 'td')).join('')}</tbody>` : '') + `</table></div>`;
     }
     function tablesHtml(c) { return cardTables(c).map(tableHtml).join(''); }
 
     function tblLoad(card) { tblList = card ? cardTables(card) : []; tblRender(); }
     function tblToString() {
-      const list = tblList.map(tb => ({ title: tb.title.trim(), rows: tb.rows.map(r => r.map(v => String(v).trim())) }))
-        .filter(tb => tb.title || tb.rows.some(r => r.some(Boolean)));
+      const has = v => v !== '';
+      const list = tblList.map(tb => {
+        let rows = tb.rows.map(r => r.map(v => String(v).trim()));
+        const keepC = rows[0].map((_, j) => rows.some(r => has(r[j])));
+        rows = rows.filter((r, i) => i === 0 || r.some(has)).map(r => r.filter((_, j) => keepC[j])); /* 빈 열·행 정리 (첫 줄은 제목행 위치 유지) */
+        return { title: tb.title.trim(), rows };
+      }).filter(tb => tb.rows.some(r => r.some(has)));
       return list.length ? JSON.stringify(list) : '';
     }
     function tblAdd() {
