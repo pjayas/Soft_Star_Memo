@@ -60,6 +60,7 @@
     #modal textarea.tbl-cell { min-height: 44px; }
     .tbl-block { border: 1px solid #e2e8f0; border-radius: 12px; padding: .6rem; margin-bottom: .6rem; background: #f8fafc; }
     .tbl-cell.head { background: #f1f5f9; font-weight: 700; }
+    .user-table-title { font-weight: 700; font-size: .95em; margin: .6rem 0 -.3rem; }
     .user-table { overflow-x: auto; margin: .6rem 0; }
     .user-table table { width: 100%; border-collapse: collapse; font-size: .92em; background: rgba(255,255,255,.5); }
     .user-table th, .user-table td { border: 1px solid rgba(100,100,100,.45); padding: 6px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
@@ -479,7 +480,7 @@
       return frag;
     }
 
-    /* ----- 표: 여러 개 지원. 카드의 tables 필드에 JSON 문자열로 저장 (예전 table 필드도 읽어줍니다) ----- */
+    /* ----- 표: 여러 개 + 제목. 카드의 tables 필드에 JSON 문자열 [{title, rows}] 로 저장 (예전 형식도 읽어줍니다) ----- */
     const TBL_R = 20, TBL_C = 8, TBL_N = 10;
     let tblList = [];
     function tblNorm(t) {
@@ -496,26 +497,29 @@
       let list = [];
       if (c.tables) { try { list = JSON.parse(c.tables); } catch (e) { list = []; } }
       else if (c.table) list = [tblParseOld(c.table)];
-      return (Array.isArray(list) ? list : []).map(tblNorm).filter(t => t.length);
+      return (Array.isArray(list) ? list : [])
+        .map(x => Array.isArray(x) ? { title: '', rows: tblNorm(x) } : { title: String((x && x.title) || '').slice(0, 60), rows: tblNorm(x && x.rows) })
+        .filter(x => x.rows.length);
     }
-    function tableHtml(rows) {
-      rows = tblNorm(rows);
-      if (!rows.length) return '';
+    function tableHtml(tb) {
+      const rows = tb.rows;
       const cell = v => esc(v).replace(/\n/g, '<br>');
       const body = rows.slice(1);
-      return `<div class="user-table"><table><thead><tr>${rows[0].map(h => `<th>${cell(h)}</th>`).join('')}</tr></thead>` +
+      return (tb.title ? `<div class="user-table-title">📊 ${esc(tb.title)}</div>` : '') +
+        `<div class="user-table"><table><thead><tr>${rows[0].map(h => `<th>${cell(h)}</th>`).join('')}</tr></thead>` +
         (body.length ? `<tbody>${body.map(r => `<tr>${r.map(x => `<td>${cell(x)}</td>`).join('')}</tr>`).join('')}</tbody>` : '') + `</table></div>`;
     }
     function tablesHtml(c) { return cardTables(c).map(tableHtml).join(''); }
 
     function tblLoad(card) { tblList = card ? cardTables(card) : []; tblRender(); }
     function tblToString() {
-      const list = tblList.map(t => t.map(r => r.map(v => String(v).trim()))).filter(t => t.some(r => r.some(Boolean)));
+      const list = tblList.map(tb => ({ title: tb.title.trim(), rows: tb.rows.map(r => r.map(v => String(v).trim())) }))
+        .filter(tb => tb.title || tb.rows.some(r => r.some(Boolean)));
       return list.length ? JSON.stringify(list) : '';
     }
     function tblAdd() {
       if (tblList.length >= TBL_N) { toast('표는 최대 ' + TBL_N + '개까지 넣을 수 있어요.'); return; }
-      tblList.push(Array.from({ length: 3 }, () => ['', '', '']));
+      tblList.push({ title: '', rows: Array.from({ length: 3 }, () => ['', '', '']) });
       tblRender();
     }
     function tblRemove(i) {
@@ -523,8 +527,8 @@
       tblList.splice(i, 1); tblRender();
     }
     function tblResize(i) {
-      const r = +document.getElementById('tblR' + i).value, c = +document.getElementById('tblC' + i).value, old = tblList[i];
-      tblList[i] = Array.from({ length: r }, (_, a) => Array.from({ length: c }, (_, b) => (old[a] && old[a][b]) || ''));
+      const r = +document.getElementById('tblR' + i).value, c = +document.getElementById('tblC' + i).value, old = tblList[i].rows;
+      tblList[i].rows = Array.from({ length: r }, (_, a) => Array.from({ length: c }, (_, b) => (old[a] && old[a][b]) || ''));
       tblRender();
     }
     function tblGrow(el) { el.style.height = 'auto'; if (el.scrollHeight) el.style.height = el.scrollHeight + 'px'; }
@@ -532,7 +536,7 @@
       const box = document.getElementById('tblEditor');
       if (!tblList.length) { box.innerHTML = '<p class="text-xs text-slate-400 mb-1">아직 표가 없어요. 아래 버튼으로 추가하세요.</p>'; return; }
       const opts = (n, u) => Array.from({ length: n }, (_, k) => `<option value="${k + 1}">${k + 1}${u}</option>`).join('');
-      box.innerHTML = tblList.map((t, i) => `
+      box.innerHTML = tblList.map((tb, i) => `
         <div class="tbl-block">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-xs font-bold text-slate-600 whitespace-nowrap">표 ${i + 1}</span>
@@ -541,17 +545,18 @@
             <select id="tblC${i}" onchange="tblResize(${i})" class="flex-1 px-2 py-2 text-sm border border-slate-300 rounded-lg">${opts(TBL_C, '열')}</select>
             <button type="button" onclick="tblRemove(${i})" title="표 삭제" class="px-3 text-sm bg-red-50 text-red-700 border border-red-200 rounded-lg">🗑</button>
           </div>
-          <div class="overflow-x-auto"><table class="tbl-edit">${t.map((r, a) => '<tr>' + r.map((v, b) =>
-            `<td><textarea rows="1" class="tbl-cell${a === 0 ? ' head' : ''}" placeholder="${a === 0 ? '제목' : ''}" oninput="tblList[${i}][${a}][${b}]=this.value;tblGrow(this)" onpaste="tblPaste(event,${i},${a},${b})">\n${esc(v)}</textarea></td>`).join('') + '</tr>').join('')}</table></div>
+          <input maxlength="60" value="${esc(tb.title)}" placeholder="표 제목 (선택)" oninput="tblList[${i}].title=this.value" class="w-full mb-2 px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg bg-white">
+          <div class="overflow-x-auto"><table class="tbl-edit">${tb.rows.map((r, a) => '<tr>' + r.map((v, b) =>
+            `<td><textarea rows="1" class="tbl-cell${a === 0 ? ' head' : ''}" placeholder="${a === 0 ? '제목' : ''}" oninput="tblList[${i}].rows[${a}][${b}]=this.value;tblGrow(this)" onpaste="tblPaste(event,${i},${a},${b})">\n${esc(v)}</textarea></td>`).join('') + '</tr>').join('')}</table></div>
         </div>`).join('');
-      tblList.forEach((t, i) => { document.getElementById('tblR' + i).value = t.length; document.getElementById('tblC' + i).value = t[0].length; });
+      tblList.forEach((tb, i) => { document.getElementById('tblR' + i).value = tb.rows.length; document.getElementById('tblC' + i).value = tb.rows[0].length; });
       box.querySelectorAll('textarea').forEach(tblGrow);
     }
     function tblPaste(e, i, r0, c0) {
       const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\r/g, '').replace(/\n$/, '');
       if (!text.includes('\t')) return; /* 탭이 없으면 일반 붙여넣기(칸 안 줄바꿈) */
       e.preventDefault();
-      const rows = text.split('\n').map(l => l.split('\t')), t = tblList[i];
+      const rows = text.split('\n').map(l => l.split('\t')), t = tblList[i].rows;
       const needR = Math.min(TBL_R, Math.max(t.length, r0 + rows.length));
       const cols = Math.min(TBL_C, Math.max(t[0].length, c0 + Math.max(...rows.map(a => a.length))));
       while (t.length < needR) t.push([]);
@@ -565,11 +570,12 @@
       !!window.fbCurrentUser &&
       c.ownerUid === window.fbCurrentUser.uid;
       const el = document.createElement('article');
-      const isHex = /^#[0-9a-fA-F]{6}$/.test(c.color);
-      el.className = `sticky-note ${isHex ? 'note-custom' : 'note-' + c.color} ${c.tilt}`;
-      if (isHex) {
-        el.style.background = `linear-gradient(135deg, ${mixWhite(c.color, 0.85)} 0%, ${mixWhite(c.color, 0.64)} 100%)`;
-        el.style.borderTopColor = c.color;
+      const preset = COLOR_PRESETS.find(x => x.id === c.color);
+      const hex = /^#[0-9a-fA-F]{6}$/.test(c.color) ? c.color : (preset ? preset.hex : null);
+      el.className = `sticky-note ${hex ? 'note-custom' : 'note-' + c.color} ${c.tilt}`;
+      if (hex) {
+        el.style.background = `linear-gradient(135deg, ${mixWhite(hex, 0.85)} 0%, ${mixWhite(hex, 0.64)} 100%)`;
+        el.style.borderTopColor = hex;
       }
       c.body = c.body || ''; c.memo = c.memo || ''; c.warn = c.warn || ''; c.table = c.table || ''; c.tables = c.tables || '';
       el.dataset.category = c.category;
@@ -730,12 +736,12 @@
 
     /* ========== 색상 선택 ========== */
     const COLOR_PRESETS = [
-      { id: 'red',    hex: '#F5A3A3', label: '연한 빨강' },
-      { id: 'yellow', hex: '#F2E590', label: '연한 노랑' },
-      { id: 'green',  hex: '#A3EB9C', label: '연한 초록' },
-      { id: 'blue',   hex: '#9DE6EA', label: '연한 파랑' },
-      { id: 'purple', hex: '#BC9BEB', label: '연한 보라' },
-      { id: 'orange', hex: '#FFC48F', label: '연한 주황' }
+      { id: 'red',    hex: '#FFDBD8', label: '빨강' },
+      { id: 'orange', hex: '#FED8A8', label: '주황' },
+      { id: 'yellow', hex: '#FEF8C2', label: '노랑' },
+      { id: 'green',  hex: '#DFEDD4', label: '초록' },
+      { id: 'blue',   hex: '#CBEFFF', label: '파랑' },
+      { id: 'purple', hex: '#EFCAFF', label: '보라' }
     ];
 
     function mixWhite(hex, t) {
